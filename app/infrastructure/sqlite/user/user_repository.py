@@ -1,0 +1,41 @@
+from typing import Optional, List
+
+from sqlalchemy.exc import NoResultFound
+from sqlalchemy.orm.session import Session
+
+from app.domain.user.model.user import User
+from app.domain.user.repository.user_repository import UserRepository
+from app.infrastructure.sqlite.user.db_user import DBUser
+
+
+class UserRepositoryImpl(UserRepository):
+    """UserRepositoryImpl implements CRUD operations related User entity using SQLAlchemy."""
+
+    def __init__(self, session: Session):
+        self.session: Session = session
+
+    def find_by_email(self, email: str) -> Optional[User]:
+        try:
+            user_db = self.session.query(DBUser).filter_by(email=email).one()
+        except NoResultFound:
+            return None
+        except:
+            raise
+
+        return user_db.to_entity()
+
+    def create(self, user: User):
+        user_db = DBUser.from_entity(user)
+        try:
+            self.session.add(user_db)
+        except:
+            raise
+
+    def begin(self):
+        self.session.begin()
+
+    def commit(self):
+        self.session.commit()
+
+    def rollback(self):
+        self.session.rollback()
