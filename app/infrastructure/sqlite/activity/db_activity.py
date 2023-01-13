@@ -23,8 +23,6 @@ class DBActivity(Base):
     id: Union[int, Column] = Column(Integer, primary_key=True, autoincrement=True)
     type: Union[int, Column] = Column(Integer, nullable=False)
     name: Union[str, Column] = Column(String, nullable=False)
-    school_id: Union[int, Column] = Column(Integer, ForeignKey('school.id'))
-    school = relationship("DBSchool", back_populates='activities')
     description: Union[str, Column] = Column(String, nullable=False)
     more: Union[str, Column] = Column(String, nullable=False)
     start_date: Union[int, Column] = Column(Integer, index=True, nullable=False)
@@ -41,7 +39,6 @@ class DBActivity(Base):
             id=self.id,
             type=Type.from_int(self.type),
             name=self.name,
-            school=School(self.school.name),
             description=self.description,
             more=self.more,
             start_date=self.start_date,
@@ -60,7 +57,6 @@ class DBActivity(Base):
         activity_db_to_update.id = activity.id
         activity_db_to_update.type = activity.type.value
         activity_db_to_update.name = activity.name
-        activity_db_to_update.school_id = activity.school.id
         activity_db_to_update.description = activity.description
         activity_db_to_update.more = activity.more
         activity_db_to_update.start_date = activity.start_date

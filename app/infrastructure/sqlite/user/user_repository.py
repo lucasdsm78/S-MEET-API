@@ -1,10 +1,12 @@
 from typing import Optional, List
 
+from sqlalchemy import text
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm.session import Session
 
 from app.domain.user.model.user import User
 from app.domain.user.repository.user_repository import UserRepository
+from app.infrastructure.sqlite.school.db_school import DBSchool
 from app.infrastructure.sqlite.user.db_user import DBUser
 
 
@@ -30,6 +32,21 @@ class UserRepositoryImpl(UserRepository):
             self.session.add(user_db)
         except:
             raise
+
+    def find_users(self) -> List[User]:
+        try:
+            user_dbs = (
+                self.session.query(DBUser)
+                .order_by(DBUser.last_name)
+                .all()
+            )
+        except:
+            raise
+
+        if len(user_dbs) == 0:
+            return []
+
+        return list(map(lambda user_db: user_db.to_entity(), user_dbs))
 
     def begin(self):
         self.session.begin()

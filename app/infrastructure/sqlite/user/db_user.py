@@ -6,6 +6,7 @@ from sqlalchemy.orm import relationship
 
 from app.domain.user.model.email import Email
 from app.domain.user.model.password import Password
+from app.domain.user.model.school import School
 from app.domain.user.model.user import User
 from app.infrastructure.sqlite.database import Base
 from app.infrastructure.sqlite.school.db_school import DBSchool
@@ -29,6 +30,7 @@ class DBUser(Base):
     last_name: Union[str, Column] = Column(String, nullable=False)
     school_id: Union[int, Column] = Column(Integer, ForeignKey('school.id'))
     school = relationship("DBSchool", back_populates='users')
+    activities = relationship("DBActivity", back_populates="user")
 
     def to_entity(self) -> User:
         return User(
@@ -40,7 +42,7 @@ class DBUser(Base):
             first_name=self.first_name,
             pseudo=self.pseudo,
             last_name=self.last_name,
-            school=DBSchool.to_entity(self.school),
+            school=School(id=self.school_id, name=self.school.name) if self.school else None
         )
 
     @staticmethod

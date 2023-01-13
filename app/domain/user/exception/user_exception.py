@@ -3,3 +3,10 @@ class UserEmailAlreadyExistsError(Exception):
 
     def __str__(self):
         return UserEmailAlreadyExistsError.message
+
+
+class UsersNotFoundError(Exception):
+    message = "No users found from the API."
+
+    def __str__(self):
+        return UsersNotFoundError.message

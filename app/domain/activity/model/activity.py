@@ -13,7 +13,6 @@ class Activity:
             self,
             type: Type,
             name: str,
-            school: School,
             description: str,
             more: str,
             start_date: int,
@@ -27,7 +26,6 @@ class Activity:
     ):
         self.id: Optional[int] = id
         self.type: Type = type
-        self.school: School = school
         self.name: str = name
         self.description: str = description
         self.more: str = more

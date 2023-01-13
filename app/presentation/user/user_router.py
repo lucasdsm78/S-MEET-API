@@ -2,9 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 
 from app.application.user.user_command_model import UserCreateResponse, UserCreateModel
 from app.application.user.user_command_usecase import UserCommandUseCase
-from app.dependency_injections import user_command_usecase
-from app.domain.user.exception.user_exception import UserEmailAlreadyExistsError
-from app.presentation.user.user_error_message import ErrorMessageUserEmailAlreadyExists
+from app.application.user.user_query_usecase import UserQueryUseCase
+from app.dependency_injections import user_command_usecase, user_query_usecase
+from app.domain.user.exception.user_exception import UserEmailAlreadyExistsError, UsersNotFoundError
+from app.presentation.user.user_error_message import ErrorMessageUserEmailAlreadyExists, ErrorMessageUsersNotFound
 
 router = APIRouter(
     tags=['user']
@@ -40,3 +41,32 @@ async def create_user(
         raise
 
     return user
+
+
+@router.get(
+    "/users",
+    response_model=dict,
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorMessageUsersNotFound,
+        }
+    }
+)
+async def get_users(
+        user_query_usecase: UserQueryUseCase = Depends(user_query_usecase),
+):
+    try:
+        users = user_query_usecase.fetch_users()
+
+    except Exception as e:
+        print(e)
+        raise
+
+    if not len(users.get("users")):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=UsersNotFoundError.message,
+        )
+
+    return users

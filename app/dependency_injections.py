@@ -1,6 +1,7 @@
 from app.application.activities.activity_command_usecase import ActivityCommandUseCase, ActivityCommandUseCaseImpl
 from app.application.school.school_command_usecase import SchoolCommandUseCase, SchoolCommandUseCaseImpl
 from app.application.user.user_command_usecase import UserCommandUseCase, UserCommandUseCaseImpl
+from app.application.user.user_query_usecase import UserQueryUseCase, UserQueryUseCaseImpl
 from app.domain.activity.repository.activity_repository import ActivityRepository
 from app.domain.school.repository.school_repository import SchoolRepository
 from app.domain.user.repository.user_repository import UserRepository
@@ -38,16 +39,30 @@ def user_repository_dependency(session: Session = Depends(get_session)) -> UserR
     return UserRepositoryImpl(session)
 
 
+def school_repository_dependency(session: Session = Depends(get_session)) -> SchoolRepository:
+    return SchoolRepositoryImpl(session)
+
+
+def activity_repository_dependency(session: Session = Depends(get_session)) -> ActivityRepository:
+    return ActivityRepositoryImpl(session)
+
+
 def user_command_usecase(
-        user_repository: UserRepository = Depends(user_repository_dependency)
+        user_repository: UserRepository = Depends(user_repository_dependency),
+        school_repository: SchoolRepository = Depends(school_repository_dependency)
 ) -> UserCommandUseCase:
     return UserCommandUseCaseImpl(
-        user_repository=user_repository
+        user_repository=user_repository,
+        school_repository=school_repository
     )
 
 
-def school_repository_dependency(session: Session = Depends(get_session)) -> SchoolRepository:
-    return SchoolRepositoryImpl(session)
+def user_query_usecase(
+        user_repository: UserRepository = Depends(user_repository_dependency)
+) -> UserQueryUseCase:
+    return UserQueryUseCaseImpl(
+        user_repository=user_repository
+    )
 
 
 def school_command_usecase(
@@ -58,12 +73,11 @@ def school_command_usecase(
     )
 
 
-def activity_repository_dependency(session: Session = Depends(get_session)) -> ActivityRepository:
-    return ActivityRepositoryImpl(session)
-
-
 def activity_command_usecase(
         activity_repository: ActivityRepository = Depends(activity_repository_dependency),
         user_repository: UserRepository = Depends(user_repository_dependency)
 ) -> ActivityCommandUseCase:
-    return ActivityCommandUseCaseImpl(activity_repository=activity_repository, user_repository=user_repository)
+    return ActivityCommandUseCaseImpl(
+        activity_repository=activity_repository,
+        user_repository=user_repository
+    )

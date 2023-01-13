@@ -6,8 +6,7 @@ class ActivityCreateModel(BaseModel):
 
     name: str = Field(example="repas chez KFC")
     email: str
-    type: int = Field(example="1, 2")
-    school: str = Field(example="ESIEEIT")
+    type: int = Field(example=1)
     description: str = Field(example="manger midi chez kfc à pontoise")
     more: str = Field(example="moredetails")
     start_date: int

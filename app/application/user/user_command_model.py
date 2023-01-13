@@ -7,7 +7,7 @@ class UserCreateModel(BaseModel):
     pseudo: str = Field(example="lucasdsm")
     first_name: str = Field(example="Lucas")
     last_name: str = Field(example="Da Silva Marques")
-    email: str = Field(example="doc@docaxess.com")
+    email: str = Field(example="lucas@esieeit.fr")
     password: str = Field(example="password")
     school: str
 

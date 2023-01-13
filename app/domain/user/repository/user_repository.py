@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Optional, List
 
 from app.domain.user.model.user import User
 
@@ -17,6 +17,10 @@ class UserRepository(ABC):
 
     @abstractmethod
     def find_by_email(self, email: str) -> Optional[User]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def find_users(self) -> List[User]:
         raise NotImplementedError
 
     @abstractmethod

@@ -4,6 +4,7 @@ from app.application.activities.activity_command_model import ActivityCreateMode
 from app.domain.activity.model.activity import Activity
 from app.domain.activity.model.type import Type
 from app.domain.activity.repository.activity_repository import ActivityRepository
+from app.domain.school.repository.school_repository import SchoolRepository
 from app.domain.user.model.school import School
 from app.domain.user.model.user_summary import UserSummary
 
@@ -34,9 +35,8 @@ class ActivityCommandUseCaseImpl(ActivityCommandUseCase):
             user = self.user_repository.find_by_email(data.email)
 
             activity = Activity(
-                type=Type(data.type),
+                type=Type.from_int(data.type),
                 name=data.name,
-                school=School(name=data.school),
                 description=data.description,
                 more=data.more,
                 start_date=data.start_date,
