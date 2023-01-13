@@ -1,4 +1,5 @@
 from app.application.activities.activity_command_usecase import ActivityCommandUseCase, ActivityCommandUseCaseImpl
+from app.application.activities.activity_query_usecase import ActivityQueryUseCase, ActivityQueryUseCaseImpl
 from app.application.school.school_command_usecase import SchoolCommandUseCase, SchoolCommandUseCaseImpl
 from app.application.user.user_command_usecase import UserCommandUseCase, UserCommandUseCaseImpl
 from app.application.user.user_query_usecase import UserQueryUseCase, UserQueryUseCaseImpl
@@ -80,4 +81,12 @@ def activity_command_usecase(
     return ActivityCommandUseCaseImpl(
         activity_repository=activity_repository,
         user_repository=user_repository
+    )
+
+
+def activity_query_usecase(
+        activity_repository: ActivityRepository = Depends(activity_repository_dependency)
+) -> ActivityQueryUseCase:
+    return ActivityQueryUseCaseImpl(
+        activity_repository=activity_repository
     )

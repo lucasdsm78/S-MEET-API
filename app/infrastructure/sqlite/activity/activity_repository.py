@@ -1,3 +1,5 @@
+from typing import List
+
 from sqlalchemy.orm.session import Session
 
 from app.domain.activity.model.activity import Activity
@@ -17,6 +19,21 @@ class ActivityRepositoryImpl(ActivityRepository):
             self.session.add(activity_db)
         except:
             raise
+
+    def find_activities(self) -> List[Activity]:
+        try:
+            activity_dbs = (
+                self.session.query(DBActivity)
+                .order_by(DBActivity.name)
+                .all()
+            )
+        except:
+            raise
+
+        if len(activity_dbs) == 0:
+            return []
+
+        return list(map(lambda activity_db: activity_db.to_entity(), activity_dbs))
 
     def begin(self):
         self.session.begin()

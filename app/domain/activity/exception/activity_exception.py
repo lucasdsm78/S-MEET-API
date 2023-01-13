@@ -6,3 +6,10 @@ class InvalidTypeException(Exception):
 
     def __str__(self):
         return f"{self.type} is not a valid type"
+
+
+class ActivitiesNotFoundError(Exception):
+    message = "No activities found from the API."
+
+    def __str__(self):
+        return ActivitiesNotFoundError.message

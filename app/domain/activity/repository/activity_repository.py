@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Optional, List
 
 from app.domain.activity.model.activity import Activity
 
@@ -9,6 +9,10 @@ class ActivityRepository(ABC):
 
     @abstractmethod
     def create(self, activity: Activity) -> Optional[Activity]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def find_activities(self) -> List[Activity]:
         raise NotImplementedError
 
     @abstractmethod
