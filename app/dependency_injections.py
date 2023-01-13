@@ -1,5 +1,7 @@
+from app.application.activities.activity_command_usecase import ActivityCommandUseCase, ActivityCommandUseCaseImpl
 from app.application.school.school_command_usecase import SchoolCommandUseCase, SchoolCommandUseCaseImpl
 from app.application.user.user_command_usecase import UserCommandUseCase, UserCommandUseCaseImpl
+from app.domain.activity.repository.activity_repository import ActivityRepository
 from app.domain.school.repository.school_repository import SchoolRepository
 from app.domain.user.repository.user_repository import UserRepository
 from app.infrastructure.config import Settings
@@ -10,6 +12,7 @@ from typing import Iterator
 from fastapi import Depends
 from sqlalchemy.orm.session import Session
 
+from app.infrastructure.sqlite.activity.activity_repository import ActivityRepositoryImpl
 from app.infrastructure.sqlite.database import create_tables, SessionLocal
 from app.infrastructure.sqlite.school.school_repository import SchoolRepositoryImpl
 from app.infrastructure.sqlite.user.user_repository import UserRepositoryImpl
@@ -53,3 +56,14 @@ def school_command_usecase(
     return SchoolCommandUseCaseImpl(
         school_repository=school_repository
     )
+
+
+def activity_repository_dependency(session: Session = Depends(get_session)) -> ActivityRepository:
+    return ActivityRepositoryImpl(session)
+
+
+def activity_command_usecase(
+        activity_repository: ActivityRepository = Depends(activity_repository_dependency),
+        user_repository: UserRepository = Depends(user_repository_dependency)
+) -> ActivityCommandUseCase:
+    return ActivityCommandUseCaseImpl(activity_repository=activity_repository, user_repository=user_repository)

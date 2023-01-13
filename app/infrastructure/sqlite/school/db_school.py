@@ -15,14 +15,12 @@ class DBSchool(Base):
 
     def to_entity(self) -> School:
         return School(
-            id=self.id,
             name=self.name
         )
 
     @staticmethod
     def from_entity(school: School, db_school: Optional["DBSchool"] = None) -> "DBSchool":
         to_update = db_school if db_school is not None else DBSchool()
-        to_update.id = school.id
         to_update.name = school.name
 
         return to_update

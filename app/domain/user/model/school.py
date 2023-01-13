@@ -3,13 +3,14 @@ from typing import Optional
 from pydantic import BaseModel
 
 
-class School(BaseModel):
-    id: Optional[int] = None
-    name: str
+class School:
+    def __init__(
+            self,
+            name: str,
+            id: Optional[int] = None
+    ):
+        self.id: int = id
+        self.name: str = name
 
     class Config():
         orm_mode = True
-
-    @classmethod
-    def create(cls, name: str):
-        return cls(name=name)

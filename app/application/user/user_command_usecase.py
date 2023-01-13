@@ -35,7 +35,7 @@ class UserCommandUseCaseImpl(UserCommandUseCase):
                 pseudo=data.pseudo,
                 first_name=data.first_name,
                 last_name=data.last_name,
-                school=School.create(data.school),
+                school=School(data.school),
                 password=Hash.bcrypt(data.password))
 
             existing_user = self.user_repository.find_by_email(data.email)
