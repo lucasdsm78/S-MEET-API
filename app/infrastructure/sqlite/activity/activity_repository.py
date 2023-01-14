@@ -1,7 +1,9 @@
-from typing import List
+from typing import List, Optional
 
+from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm.session import Session
 
+from app.domain.activity.exception.activity_exception import ActivityNotFoundError
 from app.domain.activity.model.activity import Activity
 from app.domain.activity.repository.activity_repository import ActivityRepository
 from app.infrastructure.sqlite.activity.db_activity import DBActivity
@@ -34,6 +36,16 @@ class ActivityRepositoryImpl(ActivityRepository):
             return []
 
         return list(map(lambda activity_db: activity_db.to_entity(), activity_dbs))
+
+    def find_by_id(self, activity_id: int) -> Optional[Activity]:
+        try:
+            activity_db = self.session.query(DBActivity).filter_by(id=activity_id).one()
+        except NoResultFound:
+            raise ActivityNotFoundError
+        except Exception:
+            raise
+
+        return activity_db.to_entity()
 
     def begin(self):
         self.session.begin()

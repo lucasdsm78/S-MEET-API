@@ -13,3 +13,10 @@ class ActivitiesNotFoundError(Exception):
 
     def __str__(self):
         return ActivitiesNotFoundError.message
+
+
+class ActivityNotFoundError(Exception):
+    message = "The activity does not exist."
+
+    def __str__(self):
+        return ActivityNotFoundError.message
