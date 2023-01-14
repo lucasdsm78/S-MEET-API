@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 
-from app.application.user.user_command_model import UserCreateResponse, UserCreateModel
+from app.application.user.user_command_model import UserCreateResponse, UserCreateModel, UserLoginResponse, \
+    UserLoginModel
 from app.application.user.user_command_usecase import UserCommandUseCase
 from app.application.user.user_query_usecase import UserQueryUseCase
 from app.dependency_injections import user_command_usecase, user_query_usecase
@@ -70,3 +71,14 @@ async def get_users(
         )
 
     return users
+
+
+@router.post(
+    "/user/login",
+    response_model=UserLoginResponse
+)
+async def login(
+        user_login_model: UserLoginModel,
+        user_command_usecase: UserCommandUseCase = Depends(user_command_usecase),
+):
+    return user_command_usecase.login(user_login_model).for_login()

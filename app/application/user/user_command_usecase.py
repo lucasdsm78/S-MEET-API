@@ -1,13 +1,16 @@
 from abc import ABC, abstractmethod
 
-from app.application.user.user_command_model import UserCreateModel, UserCreateResponse
+from app.application.user.user_command_model import UserCreateModel, UserCreateResponse, UserLoginModel, \
+    UserLoginResponse, InvalidPasswordError
 from app.domain.school.repository.school_repository import SchoolRepository
-from app.domain.user.exception.user_exception import UserEmailAlreadyExistsError
+from app.domain.services.hash import Hash
+from app.domain.services.manager_token import ManagerToken
+from app.domain.user.exception.user_exception import UserEmailAlreadyExistsError, UserLoginNotFoundError
 
 from app.domain.user.model.email import Email
+from app.domain.user.model.password import Password
 from app.domain.user.model.school import School
 from app.domain.user.model.user import User
-from db.hash import Hash
 from app.domain.user.repository.user_repository import UserRepository
 
 
@@ -18,6 +21,10 @@ class UserCommandUseCase(ABC):
     def create(self, user_create_model: UserCreateModel):
         raise NotImplementedError
 
+    @abstractmethod
+    def login(self, user_login_model: UserLoginModel) -> UserLoginResponse:
+        raise NotImplementedError
+
 
 class UserCommandUseCaseImpl(UserCommandUseCase):
     """UserCommandUseCaseImpl implements a command usecases related User entity."""
@@ -25,10 +32,14 @@ class UserCommandUseCaseImpl(UserCommandUseCase):
     def __init__(
             self,
             user_repository: UserRepository,
-            school_repository: SchoolRepository
+            school_repository: SchoolRepository,
+            hasher: Hash,
+            manager_token: ManagerToken
     ):
         self.user_repository: UserRepository = user_repository
         self.school_repository: SchoolRepository = school_repository
+        self.hasher = hasher
+        self.manager_token = manager_token
 
     def create(self, data: UserCreateModel) -> UserCreateResponse:
         try:
@@ -41,7 +52,7 @@ class UserCommandUseCaseImpl(UserCommandUseCase):
                 first_name=data.first_name,
                 last_name=data.last_name,
                 school=School(school.name),
-                password=Hash.bcrypt(data.password))
+                password=Password(self.hasher.bcrypt(data.password)))
 
             existing_user = self.user_repository.find_by_email(data.email)
             if existing_user is not None:
@@ -55,3 +66,15 @@ class UserCommandUseCaseImpl(UserCommandUseCase):
             raise
 
         return UserCreateResponse()
+
+    def login(self, user_login_model: UserLoginModel) -> UserLoginResponse:
+        user = self.user_repository.find_by_email(user_login_model.email)
+        if not user:
+            raise UserLoginNotFoundError(user_login_model.email)
+        if not self.hasher.verify(user.password.password, user_login_model.password):
+            raise InvalidPasswordError(user_login_model.email)
+
+        return UserLoginResponse(
+            tokenAuth=self.manager_token.generate_token_login(user),
+            tokenExpiration=self.manager_token.generate_expiration_token_login(user),
+        )

@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.auth import oauth2
 from app.infrastructure.sqlite.database import get_db
-from db.hash import Hash
+from app.infrastructure.services.hash import Hash
 
 router = APIRouter(
     tags=['authentication']

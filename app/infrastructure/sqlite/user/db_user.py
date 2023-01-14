@@ -51,7 +51,7 @@ class DBUser(Base):
         user_db_to_update = db_user if db_user is not None else DBUser()
         user_db_to_update.id = user.id
         user_db_to_update.email = user.email.value
-        user_db_to_update.password = user.password
+        user_db_to_update.password = user.password.password
         user_db_to_update.created_at = now
         user_db_to_update.updated_at = now
         user_db_to_update.school_id = user.school.id

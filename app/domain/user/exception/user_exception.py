@@ -10,3 +10,12 @@ class UsersNotFoundError(Exception):
 
     def __str__(self):
         return UsersNotFoundError.message
+
+
+class UserLoginNotFoundError(Exception):
+
+    def __init__(self, login: str):
+        self.login = login
+
+    def __str__(self):
+        return f"user with login {self.login} not found"

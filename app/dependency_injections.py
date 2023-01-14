@@ -5,6 +5,8 @@ from app.application.user.user_command_usecase import UserCommandUseCase, UserCo
 from app.application.user.user_query_usecase import UserQueryUseCase, UserQueryUseCaseImpl
 from app.domain.activity.repository.activity_repository import ActivityRepository
 from app.domain.school.repository.school_repository import SchoolRepository
+from app.domain.services.hash import Hash
+from app.domain.services.manager_token import ManagerToken
 from app.domain.user.repository.user_repository import UserRepository
 from app.infrastructure.config import Settings
 
@@ -14,6 +16,8 @@ from typing import Iterator
 from fastapi import Depends
 from sqlalchemy.orm.session import Session
 
+from app.infrastructure.services.hash import HashImpl
+from app.infrastructure.services.manager_token import JwtManagerTokenImpl
 from app.infrastructure.sqlite.activity.activity_repository import ActivityRepositoryImpl
 from app.infrastructure.sqlite.database import create_tables, SessionLocal
 from app.infrastructure.sqlite.school.school_repository import SchoolRepositoryImpl
@@ -36,6 +40,14 @@ def get_settings() -> Settings:
     return Settings()
 
 
+def manager_token_dependency(settings: Settings = Depends(get_settings)) -> ManagerToken:
+    return JwtManagerTokenImpl(settings=settings)
+
+
+def hash_dependency() -> Hash:
+    return HashImpl()
+
+
 def user_repository_dependency(session: Session = Depends(get_session)) -> UserRepository:
     return UserRepositoryImpl(session)
 
@@ -50,11 +62,15 @@ def activity_repository_dependency(session: Session = Depends(get_session)) -> A
 
 def user_command_usecase(
         user_repository: UserRepository = Depends(user_repository_dependency),
-        school_repository: SchoolRepository = Depends(school_repository_dependency)
+        school_repository: SchoolRepository = Depends(school_repository_dependency),
+        hasher: Hash = Depends(hash_dependency),
+        manager_token: ManagerToken = Depends(manager_token_dependency)
 ) -> UserCommandUseCase:
     return UserCommandUseCaseImpl(
         user_repository=user_repository,
-        school_repository=school_repository
+        school_repository=school_repository,
+        hasher=hasher,
+        manager_token=manager_token
     )
 
 
