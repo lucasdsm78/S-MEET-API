@@ -5,7 +5,6 @@ class ActivityCreateModel(BaseModel):
     """ActivityCreateModel represents a write model to create an activity."""
 
     name: str = Field(example="repas chez KFC")
-    email: str
     type: int = Field(example=1)
     description: str = Field(example="manger midi chez kfc à pontoise")
     more: str = Field(example="moredetails")

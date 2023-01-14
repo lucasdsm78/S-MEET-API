@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from app.application.activities.activity_command_model import ActivityCreateResponse, ActivityCreateModel
 from app.application.activities.activity_command_usecase import ActivityCommandUseCase
 from app.application.activities.activity_query_usecase import ActivityQueryUseCase
-from app.dependency_injections import activity_command_usecase, activity_query_usecase
+from app.dependency_injections import activity_command_usecase, activity_query_usecase, current_user
 from app.domain.activity.exception.activity_exception import ActivitiesNotFoundError
 from app.presentation.activity.activity_error_message import ErrorMessageActivitiesNotFound
 
@@ -21,9 +21,10 @@ router = APIRouter(
 async def create_activity(
         data: ActivityCreateModel,
         activity_command_usecase: ActivityCommandUseCase = Depends(activity_command_usecase),
+        current_user: dict = Depends(current_user)
 ):
     try:
-        activity = activity_command_usecase.create(data)
+        activity = activity_command_usecase.create(current_user.get('email', ''), data)
 
     except Exception as e:
         raise

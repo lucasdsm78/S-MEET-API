@@ -1,3 +1,5 @@
+from fastapi.security import HTTPBearer
+
 from app.application.activities.activity_command_usecase import ActivityCommandUseCase, ActivityCommandUseCaseImpl
 from app.application.activities.activity_query_usecase import ActivityQueryUseCase, ActivityQueryUseCaseImpl
 from app.application.school.school_command_usecase import SchoolCommandUseCase, SchoolCommandUseCaseImpl
@@ -16,7 +18,9 @@ from typing import Iterator
 from fastapi import Depends
 from sqlalchemy.orm.session import Session
 
+from app.infrastructure.services.authentication import AuthenticationToken
 from app.infrastructure.services.hash import HashImpl
+from app.infrastructure.services.jwt_bearer import JwtBearer
 from app.infrastructure.services.manager_token import JwtManagerTokenImpl
 from app.infrastructure.sqlite.activity.activity_repository import ActivityRepositoryImpl
 from app.infrastructure.sqlite.database import create_tables, SessionLocal
@@ -25,6 +29,8 @@ from app.infrastructure.sqlite.user.user_repository import UserRepositoryImpl
 
 # create database
 create_tables()
+
+jwt_auth = JwtBearer()
 
 
 def get_session() -> Iterator[Session]:
@@ -106,3 +112,20 @@ def activity_query_usecase(
     return ActivityQueryUseCaseImpl(
         activity_repository=activity_repository
     )
+
+
+def authentication(
+        manager_token: ManagerToken = Depends(manager_token_dependency),
+        token: str = Depends(jwt_auth)
+) -> str:
+    token_authenticator = AuthenticationToken(
+        manager_token=manager_token,
+        token=token
+    )
+    return token_authenticator.authentication()
+
+
+def current_user(token: str = Depends(authentication),
+                 manager_token: ManagerToken = Depends(manager_token_dependency)
+                 ) -> dict:
+    return manager_token.decode_token_login(token)
