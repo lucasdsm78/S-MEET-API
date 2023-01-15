@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 from app.application.activities.activity_command_model import ActivityCreateModel, ActivityCreateResponse, \
-    ActivityParticipateResponse
+    ActivityParticipateResponse, ActivityCancelParticipationResponse
 from app.domain.activity.model.activity import Activity
 from app.domain.activity.model.activity_participants import ActivityParticipant
 from app.domain.activity.model.type import Type
@@ -21,6 +21,9 @@ class ActivityCommandUseCase(ABC):
 
     @abstractmethod
     def add_participant(self, activity_id: int, email: str) -> ActivityParticipateResponse:
+        raise NotImplementedError
+
+    def delete_participant(self, activity_id: int, email: str) -> ActivityCancelParticipationResponse:
         raise NotImplementedError
 
 
@@ -78,3 +81,16 @@ class ActivityCommandUseCaseImpl(ActivityCommandUseCase):
             raise
 
         return ActivityParticipateResponse()
+
+    def delete_participant(self, activity_id: int, email: str) -> ActivityCancelParticipationResponse:
+        try:
+            user = self.user_repository.find_by_email(email)
+            activity = self.activity_repository.find_by_id(activity_id)
+            activity_participant = self.activity_participant_repository.find_participation(activity.id, user.id)
+            self.activity_participant_repository.delete_participant(activity_participant.id)
+            self.activity_participant_repository.commit()
+        except:
+            self.activity_participant_repository.rollback()
+            raise
+
+        return ActivityCancelParticipationResponse()

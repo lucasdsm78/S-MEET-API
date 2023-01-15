@@ -20,3 +20,10 @@ class ActivityNotFoundError(Exception):
 
     def __str__(self):
         return ActivityNotFoundError.message
+
+
+class ActivityParticipantNotFoundError(Exception):
+    message = "You are not participating in this activity."
+
+    def __str__(self):
+        return ActivityParticipantNotFoundError.message

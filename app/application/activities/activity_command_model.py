@@ -20,3 +20,7 @@ class ActivityParticipateResponse(BaseModel):
 
 class ActivityCreateResponse(BaseModel):
     message: str = "The activity is well created"
+
+
+class ActivityCancelParticipationResponse(BaseModel):
+    message: str = "Your participation is well canceled"

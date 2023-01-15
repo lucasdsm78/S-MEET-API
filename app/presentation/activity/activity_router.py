@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from fastapi.params import Path
 
 from app.application.activities.activity_command_model import ActivityCreateResponse, ActivityCreateModel, \
-    ActivityParticipateResponse
+    ActivityParticipateResponse, ActivityCancelParticipationResponse
 from app.application.activities.activity_command_usecase import ActivityCommandUseCase
 from app.application.activities.activity_query_model import ActivityReadModel
 from app.application.activities.activity_query_usecase import ActivityQueryUseCase
@@ -135,3 +135,38 @@ async def participate_activity(
         )
 
     return activity_participant
+
+
+@router.delete(
+    "/activity/{id}/participation/cancel",
+    status_code=status.HTTP_202_ACCEPTED,
+        summary="Cancel a participation to an activity",
+    response_model=ActivityCancelParticipationResponse,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorMessageActivityNotFound,
+        },
+    },
+)
+async def cancel_participation_activity(
+        activity_id: int,
+        activity_command_usecase: ActivityCommandUseCase = Depends(activity_command_usecase),
+        current_user: dict = Depends(current_user),
+):
+    try:
+        cancel_participation_activity = activity_command_usecase.delete_participant(
+            activity_id,
+            current_user.get('email', '')
+        )
+    except UserNotFoundError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=e.message,
+        )
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+    return cancel_participation_activity
