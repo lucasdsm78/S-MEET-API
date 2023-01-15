@@ -33,6 +33,7 @@ class DBActivity(Base):
     user = relationship("DBUser", back_populates='activities')
     created_at: Union[int, Column] = Column(Integer, index=True, nullable=False)
     updated_at: Union[int, Column] = Column(Integer, index=True, nullable=False)
+    activity_participants = relationship("DBActivityParticipants", back_populates="activity")
 
     def to_entity(self) -> Activity:
         return Activity(
