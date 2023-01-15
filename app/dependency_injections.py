@@ -5,6 +5,7 @@ from app.application.activities.activity_query_usecase import ActivityQueryUseCa
 from app.application.school.school_command_usecase import SchoolCommandUseCase, SchoolCommandUseCaseImpl
 from app.application.user.user_command_usecase import UserCommandUseCase, UserCommandUseCaseImpl
 from app.application.user.user_query_usecase import UserQueryUseCase, UserQueryUseCaseImpl
+from app.domain.activity.repository.activity_participant_repository import ActivityParticipantRepository
 from app.domain.activity.repository.activity_repository import ActivityRepository
 from app.domain.school.repository.school_repository import SchoolRepository
 from app.domain.services.hash import Hash
@@ -22,6 +23,7 @@ from app.infrastructure.services.authentication import AuthenticationToken
 from app.infrastructure.services.hash import HashImpl
 from app.infrastructure.services.jwt_bearer import JwtBearer
 from app.infrastructure.services.manager_token import JwtManagerTokenImpl
+from app.infrastructure.sqlite.activity.activity_participant_repository import ActivityParticipantRepositoryImpl
 from app.infrastructure.sqlite.activity.activity_repository import ActivityRepositoryImpl
 from app.infrastructure.sqlite.database import create_tables, SessionLocal
 from app.infrastructure.sqlite.school.school_repository import SchoolRepositoryImpl
@@ -66,6 +68,11 @@ def activity_repository_dependency(session: Session = Depends(get_session)) -> A
     return ActivityRepositoryImpl(session)
 
 
+def activity_participant_repository_dependency(session: Session = Depends(get_session)) \
+        -> ActivityParticipantRepository:
+    return ActivityParticipantRepositoryImpl(session)
+
+
 def user_command_usecase(
         user_repository: UserRepository = Depends(user_repository_dependency),
         school_repository: SchoolRepository = Depends(school_repository_dependency),
@@ -98,11 +105,14 @@ def school_command_usecase(
 
 def activity_command_usecase(
         activity_repository: ActivityRepository = Depends(activity_repository_dependency),
-        user_repository: UserRepository = Depends(user_repository_dependency)
+        user_repository: UserRepository = Depends(user_repository_dependency),
+        activity_participant_repository: ActivityParticipantRepository =
+        Depends(activity_participant_repository_dependency),
 ) -> ActivityCommandUseCase:
     return ActivityCommandUseCaseImpl(
         activity_repository=activity_repository,
-        user_repository=user_repository
+        user_repository=user_repository,
+        activity_participant_repository=activity_participant_repository,
     )
 
 

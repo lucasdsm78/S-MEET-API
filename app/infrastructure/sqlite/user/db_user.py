@@ -29,8 +29,9 @@ class DBUser(Base):
     pseudo: Union[str, Column] = Column(String, nullable=False)
     last_name: Union[str, Column] = Column(String, nullable=False)
     school_id: Union[int, Column] = Column(Integer, ForeignKey('school.id'))
-    school = relationship("DBSchool", back_populates='users')
+    school = relationship("DBSchool", back_populates='user')
     activities = relationship("DBActivity", back_populates="user")
+    activity_participants = relationship("DBActivityParticipants", back_populates="user")
 
     def to_entity(self) -> User:
         return User(

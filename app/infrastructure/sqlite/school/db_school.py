@@ -11,7 +11,7 @@ class DBSchool(Base):
     __tablename__ = "school"
     id: Union[int, Column] = Column(Integer, primary_key=True, autoincrement=True)
     name: Union[str, Column] = Column(String, nullable=False)
-    users = relationship("DBUser", back_populates="school")
+    user = relationship("DBUser", back_populates="school")
 
     def to_entity(self) -> School:
         return School(

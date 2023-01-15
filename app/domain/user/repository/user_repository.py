@@ -20,6 +20,10 @@ class UserRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def find_by_id(self, user_id: int) -> Optional[User]:
+        raise NotImplementedError
+
+    @abstractmethod
     def find_users(self) -> List[User]:
         raise NotImplementedError
 

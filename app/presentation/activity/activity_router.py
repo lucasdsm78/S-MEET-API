@@ -1,14 +1,19 @@
+from typing import Union
+
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from fastapi.params import Path
 
-from app.application.activities.activity_command_model import ActivityCreateResponse, ActivityCreateModel
+from app.application.activities.activity_command_model import ActivityCreateResponse, ActivityCreateModel, \
+    ActivityParticipateResponse
 from app.application.activities.activity_command_usecase import ActivityCommandUseCase
 from app.application.activities.activity_query_model import ActivityReadModel
 from app.application.activities.activity_query_usecase import ActivityQueryUseCase
 from app.dependency_injections import activity_command_usecase, activity_query_usecase, current_user
 from app.domain.activity.exception.activity_exception import ActivitiesNotFoundError, ActivityNotFoundError
+from app.domain.user.exception.user_exception import UserNotFoundError
 from app.presentation.activity.activity_error_message import ErrorMessageActivitiesNotFound, \
     ErrorMessageActivityNotFound
+from app.presentation.user.user_error_message import ErrorMessageUserNotFound
 
 router = APIRouter(
     tags=['activity']
@@ -93,3 +98,40 @@ async def get_activity(
     return activity
 
 
+@router.post(
+    "/activity/{id}/participate",
+    response_model=ActivityParticipateResponse,
+    summary="Participate to an activity",
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "model": Union[ErrorMessageActivityNotFound, ErrorMessageUserNotFound]
+        },
+    },
+)
+async def participate_activity(
+        activity_id: int,
+        activity_command_usecase: ActivityCommandUseCase = Depends(activity_command_usecase),
+        current_user: dict = Depends(current_user),
+):
+    try:
+        activity_participant = activity_command_usecase.add_participant(activity_id, current_user.get('email', ''))
+
+    except ActivityNotFoundError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=e.message,
+        )
+
+    except UserNotFoundError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=e.message,
+        )
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+    return activity_participant

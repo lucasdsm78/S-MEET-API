@@ -14,5 +14,9 @@ class ActivityCreateModel(BaseModel):
     max_members: int
 
 
+class ActivityParticipateResponse(BaseModel):
+    message: str = "Your participation is well saved"
+
+
 class ActivityCreateResponse(BaseModel):
     message: str = "The activity is well created"
