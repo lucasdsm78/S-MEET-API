@@ -81,10 +81,10 @@ async def get_activities(
 async def get_activity(
         activity_id: int,
         activity_query_usecase: ActivityQueryUseCase = Depends(activity_query_usecase),
-
+        current_user: dict = Depends(current_user),
 ):
     try:
-        activity = activity_query_usecase.get_activity_by_id(activity_id)
+        activity = activity_query_usecase.get_activity_by_id(activity_id, current_user.get('email', ''))
     except ActivityNotFoundError as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

@@ -23,7 +23,7 @@ class ActivityParticipantRepositoryImpl(ActivityParticipantRepository):
         except:
             raise
 
-    def find_participation(self, activity_id: int, user_id: int) -> Optional[ActivityParticipant]:
+    def get_participation(self, activity_id: int, user_id: int) -> Optional[ActivityParticipant]:
         try:
             activity_participant_db = self.session.query(DBActivityParticipants).filter_by(
                 activity_id=activity_id,
@@ -35,6 +35,21 @@ class ActivityParticipantRepositoryImpl(ActivityParticipantRepository):
             raise
 
         return activity_participant_db.to_entity()
+
+    def find_participation(self, activity_id: int, user_id: int) -> bool:
+        try:
+            result = False
+            activity_participant_db = self.session.query(DBActivityParticipants).filter_by(
+                activity_id=activity_id,
+                user_id=user_id
+            ).count()
+
+            if activity_participant_db != 0:
+                result = True
+        except Exception:
+            raise
+
+        return result
 
     def delete_participant(self, activity_participant_id: int):
         try:

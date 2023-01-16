@@ -86,7 +86,7 @@ class ActivityCommandUseCaseImpl(ActivityCommandUseCase):
         try:
             user = self.user_repository.find_by_email(email)
             activity = self.activity_repository.find_by_id(activity_id)
-            activity_participant = self.activity_participant_repository.find_participation(activity.id, user.id)
+            activity_participant = self.activity_participant_repository.get_participation(activity.id, user.id)
             self.activity_participant_repository.delete_participant(activity_participant.id)
             self.activity_participant_repository.commit()
         except:

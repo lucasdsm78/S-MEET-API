@@ -12,7 +12,11 @@ class ActivityParticipantRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def find_participation(self, activity_id: int, user_id: int) -> Optional[ActivityParticipant]:
+    def get_participation(self, activity_id: int, user_id: int) -> Optional[ActivityParticipant]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def find_participation(self, activity_id: int, user_id: int) -> bool:
         raise NotImplementedError
 
     @abstractmethod

@@ -117,10 +117,15 @@ def activity_command_usecase(
 
 
 def activity_query_usecase(
-        activity_repository: ActivityRepository = Depends(activity_repository_dependency)
+        activity_repository: ActivityRepository = Depends(activity_repository_dependency),
+        user_repository: UserRepository = Depends(user_repository_dependency),
+        activity_participant_repository: ActivityParticipantRepository =
+        Depends(activity_participant_repository_dependency),
 ) -> ActivityQueryUseCase:
     return ActivityQueryUseCaseImpl(
-        activity_repository=activity_repository
+        activity_repository=activity_repository,
+        user_repository=user_repository,
+        activity_participant_repository=activity_participant_repository
     )
 
 
