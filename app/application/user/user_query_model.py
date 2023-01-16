@@ -28,3 +28,15 @@ class UserReadModel(BaseModel):
             last_name=user.last_name,
             pseudo=user.pseudo,
         )
+
+
+class ListParticipantsResponse(BaseModel):
+    first_name: str
+    last_name: str
+
+    @staticmethod
+    def from_entity(user: User) -> "ListParticipantsResponse":
+        return ListParticipantsResponse(
+            first_name=user.first_name,
+            last_name=user.last_name
+        )

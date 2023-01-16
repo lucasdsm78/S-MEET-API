@@ -3,7 +3,7 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from app.application.user.user_query_model import UserReadModel
+from app.application.user.user_query_model import UserReadModel, ListParticipantsResponse
 from app.domain.user.exception.user_exception import UserNotFoundError
 from app.domain.user.repository.user_repository import UserRepository
 
@@ -16,6 +16,10 @@ class UserQueryUseCase(ABC):
 
     @abstractmethod
     def fetch_user_by_id(self, user_id: int) -> Optional[UserReadModel]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def fetch_users_by_activity(self, activity_id: int) -> dict:
         raise NotImplementedError
 
 
@@ -46,3 +50,13 @@ class UserQueryUseCaseImpl(UserQueryUseCase, BaseModel):
 
         return UserReadModel.from_entity(user)
 
+    def fetch_users_by_activity(self, activity_id: int) -> dict:
+        try:
+            users = self.user_repository.find_users_by_activity(activity_id)
+
+            return dict(
+                users=list(map(lambda user: ListParticipantsResponse.from_entity(
+                    user=user), users))
+            )
+        except Exception as e:
+            raise

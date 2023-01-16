@@ -75,6 +75,37 @@ async def get_users(
     return users
 
 
+@router.get(
+    "/users/activity/{id}",
+    response_model=dict,
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorMessageUsersNotFound,
+        }
+    }
+)
+async def get_users_by_activity(
+        activity_id: int,
+        user_query_usecase: UserQueryUseCase = Depends(user_query_usecase),
+):
+    try:
+        users = user_query_usecase.fetch_users_by_activity(activity_id)
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+    if not len(users.get("users")):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=UsersNotFoundError.message,
+        )
+
+    return users
+
+
 @router.post(
     "/user/login",
     response_model=UserLoginResponse

@@ -7,6 +7,8 @@ from sqlalchemy.orm.session import Session
 from app.domain.user.exception.user_exception import UserNotFoundError
 from app.domain.user.model.user import User
 from app.domain.user.repository.user_repository import UserRepository
+from app.infrastructure.sqlite.activity.db_activity import DBActivity
+from app.infrastructure.sqlite.activity.db_activity_participants import DBActivityParticipants
 from app.infrastructure.sqlite.school.db_school import DBSchool
 from app.infrastructure.sqlite.user.db_user import DBUser
 
@@ -48,6 +50,23 @@ class UserRepositoryImpl(UserRepository):
         try:
             user_dbs = (
                 self.session.query(DBUser)
+                .order_by(DBUser.last_name)
+                .all()
+            )
+        except:
+            raise
+
+        if len(user_dbs) == 0:
+            return []
+
+        return list(map(lambda user_db: user_db.to_entity(), user_dbs))
+
+    def find_users_by_activity(self, activity_id: int) -> List[User]:
+        try:
+            user_dbs = (
+                self.session.query(DBUser)
+                .join(DBActivityParticipants)
+                .filter(DBActivityParticipants.activity_id == activity_id)
                 .order_by(DBUser.last_name)
                 .all()
             )

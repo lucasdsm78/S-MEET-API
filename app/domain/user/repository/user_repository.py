@@ -28,5 +28,9 @@ class UserRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def find_users_by_activity(self, activity_id: int) -> List[User]:
+        raise NotImplementedError
+
+    @abstractmethod
     def rollback(self):
         raise NotImplementedError
