@@ -29,10 +29,10 @@ router = APIRouter(
 async def create_activity(
         data: ActivityCreateModel,
         activity_command_usecase: ActivityCommandUseCase = Depends(activity_command_usecase),
-        current_user: dict = Depends(current_user)
+        # current_user: dict = Depends(current_user)
 ):
     try:
-        activity = activity_command_usecase.create(current_user.get('email', ''), data)
+        activity = activity_command_usecase.create(data)
 
     except Exception as e:
         raise

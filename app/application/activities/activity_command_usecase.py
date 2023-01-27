@@ -7,6 +7,7 @@ from app.domain.activity.model.activity_participants import ActivityParticipant
 from app.domain.activity.model.type import Type
 from app.domain.activity.repository.activity_participant_repository import ActivityParticipantRepository
 from app.domain.activity.repository.activity_repository import ActivityRepository
+from app.domain.user.model.email import Email
 from app.domain.user.model.user_summary import UserSummary
 
 from app.domain.user.repository.user_repository import UserRepository
@@ -16,7 +17,7 @@ class ActivityCommandUseCase(ABC):
     """ActivityCommandUseCase defines a command usecase inteface related Activity entity."""
 
     @abstractmethod
-    def create(self, email: str, activity_create_model: ActivityCreateModel):
+    def create(self, activity_create_model: ActivityCreateModel):
         raise NotImplementedError
 
     @abstractmethod
@@ -40,9 +41,9 @@ class ActivityCommandUseCaseImpl(ActivityCommandUseCase):
         self.user_repository: UserRepository = user_repository
         self.activity_participant_repository: ActivityParticipantRepository = activity_participant_repository
 
-    def create(self, email: str, data: ActivityCreateModel) -> ActivityCreateResponse:
+    def create(self, data: ActivityCreateModel) -> ActivityCreateResponse:
         try:
-            user = self.user_repository.find_by_email(email)
+            # user = self.user_repository.find_by_email(email)
 
             activity = Activity(
                 type=Type.from_int(data.type),
@@ -53,7 +54,7 @@ class ActivityCommandUseCaseImpl(ActivityCommandUseCase):
                 end_date=data.end_date,
                 place=data.place,
                 max_members=data.max_members,
-                user=UserSummary(id=user.id, email=user.email),
+                user=UserSummary(id=1, email=Email("lucas@esieeit.fr")),
             )
 
             self.activity_repository.create(activity)
