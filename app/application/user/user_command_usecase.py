@@ -43,7 +43,7 @@ class UserCommandUseCaseImpl(UserCommandUseCase):
 
     def create(self, data: UserCreateModel) -> UserCreateResponse:
         try:
-            school = self.school_repository.find_by_name(data.school)
+            school = self.school_repository.find_by_id(data.school)
 
             email = Email(data.email)
             user = User(
@@ -51,7 +51,7 @@ class UserCommandUseCaseImpl(UserCommandUseCase):
                 pseudo=data.pseudo,
                 first_name=data.first_name,
                 last_name=data.last_name,
-                school=School(school.name),
+                school=School(name=school.name, id=school.id),
                 password=Password(self.hasher.bcrypt(data.password)))
 
             existing_user = self.user_repository.find_by_email(data.email)

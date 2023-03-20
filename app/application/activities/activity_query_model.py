@@ -20,7 +20,7 @@ class ActivityReadModel(BaseModel):
     place: str = Field(example="Cergy")
     image_activity: str = Field(example="url_image.png")
     max_members: int = Field(example=20)
-    user_creator: str = Field(example="lucas@esieeit.fr")
+    user_creator: int = Field(example=1)
     createdAt: int = Field(example=1136214245000)
     updatedAt: int = Field(example=1136214245000)
     is_participate: Optional[bool] = None
@@ -42,7 +42,7 @@ class ActivityReadModel(BaseModel):
             place=activity.place,
             image_activity=activity.image_activity,
             max_members=activity.max_members,
-            user_creator=activity.user.email.value,
+            user_creator=activity.user.id,
             createdAt=activity.created_at,
             updatedAt=activity.updated_at
         )
@@ -61,7 +61,7 @@ class ActivityReadModel(BaseModel):
             place=activity.place,
             image_activity=activity.image_activity,
             max_members=activity.max_members,
-            user_creator=activity.user.email.value,
+            user_creator=activity.user.id,
             createdAt=activity.created_at,
             updatedAt=activity.updated_at,
             is_participate=is_participate
