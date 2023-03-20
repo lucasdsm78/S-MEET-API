@@ -11,6 +11,8 @@ class ActivityCreateModel(BaseModel):
     start_date: int
     end_date: int
     place: str = Field(example="Cergy")
+    image_activity: str
+    category: str = Field(example='after_work')
     max_members: int
 
 

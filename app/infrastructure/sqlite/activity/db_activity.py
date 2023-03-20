@@ -5,6 +5,7 @@ from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 
 from app.domain.activity.model.activity import Activity
+from app.domain.activity.model.category import Category
 from app.domain.activity.model.type import Type
 from app.domain.user.model.email import Email
 from app.domain.user.model.school import School
@@ -23,11 +24,13 @@ class DBActivity(Base):
     id: Union[int, Column] = Column(Integer, primary_key=True, autoincrement=True)
     type: Union[int, Column] = Column(Integer, nullable=False)
     name: Union[str, Column] = Column(String, nullable=False)
+    category: Union[str, Column] = Column(String, nullable=False)
     description: Union[str, Column] = Column(String, nullable=False)
     more: Union[str, Column] = Column(String, nullable=False)
     start_date: Union[int, Column] = Column(Integer, index=True, nullable=False)
     end_date: Union[int, Column] = Column(Integer, index=True, nullable=False)
     place: Union[str, Column] = Column(String, nullable=False)
+    image_activity: Union[str, Column] = Column(String, nullable=False)
     max_members: Union[int, Column] = Column(Integer, nullable=False)
     user_id: Union[int, Column] = Column(Integer, ForeignKey('user.id'))
     user = relationship("DBUser", back_populates='activities')
@@ -39,7 +42,9 @@ class DBActivity(Base):
         return Activity(
             id=self.id,
             type=Type.from_int(self.type),
+            category=Category.from_str(self.category),
             name=self.name,
+            image_activity=self.image_activity,
             description=self.description,
             more=self.more,
             start_date=self.start_date,
@@ -57,12 +62,14 @@ class DBActivity(Base):
         activity_db_to_update = db_activity if db_activity is not None else DBActivity()
         activity_db_to_update.id = activity.id
         activity_db_to_update.type = activity.type.value
+        activity_db_to_update.category = activity.category.value
         activity_db_to_update.name = activity.name
         activity_db_to_update.description = activity.description
         activity_db_to_update.more = activity.more
         activity_db_to_update.start_date = activity.start_date
         activity_db_to_update.end_date = activity.end_date
         activity_db_to_update.place = activity.place
+        activity_db_to_update.image_activity = activity.image_activity
         activity_db_to_update.max_members = activity.max_members
         activity_db_to_update.user_id = activity.user.id
         activity_db_to_update.created_at = now

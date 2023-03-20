@@ -4,6 +4,7 @@ from app.application.activities.activity_command_model import ActivityCreateMode
     ActivityParticipateResponse, ActivityCancelParticipationResponse
 from app.domain.activity.model.activity import Activity
 from app.domain.activity.model.activity_participants import ActivityParticipant
+from app.domain.activity.model.category import Category
 from app.domain.activity.model.type import Type
 from app.domain.activity.repository.activity_participant_repository import ActivityParticipantRepository
 from app.domain.activity.repository.activity_repository import ActivityRepository
@@ -46,12 +47,14 @@ class ActivityCommandUseCaseImpl(ActivityCommandUseCase):
 
             activity = Activity(
                 type=Type.from_int(data.type),
+                category=Category.from_str(data.category),
                 name=data.name,
                 description=data.description,
                 more=data.more,
                 start_date=data.start_date,
                 end_date=data.end_date,
                 place=data.place,
+                image_activity=data.image_activity,
                 max_members=data.max_members,
                 user=UserSummary(id=user.id, email=user.email),
             )
