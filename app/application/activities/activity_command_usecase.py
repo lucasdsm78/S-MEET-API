@@ -46,11 +46,10 @@ class ActivityCommandUseCaseImpl(ActivityCommandUseCase):
             user = self.user_repository.find_by_email(email)
 
             activity = Activity(
-                type=Type.from_int(data.type),
+                type=Type.from_str(data.type),
                 category=Category.from_str(data.category),
                 name=data.name,
                 description=data.description,
-                more=data.more,
                 start_date=data.start_date,
                 end_date=data.end_date,
                 place=data.place,

@@ -22,11 +22,10 @@ class DBActivity(Base):
 
     __tablename__ = "activity"
     id: Union[int, Column] = Column(Integer, primary_key=True, autoincrement=True)
-    type: Union[int, Column] = Column(Integer, nullable=False)
+    type: Union[str, Column] = Column(String, nullable=False)
     name: Union[str, Column] = Column(String, nullable=False)
     category: Union[str, Column] = Column(String, nullable=False)
     description: Union[str, Column] = Column(String, nullable=False)
-    more: Union[str, Column] = Column(String, nullable=False)
     start_date: Union[int, Column] = Column(Integer, index=True, nullable=False)
     end_date: Union[int, Column] = Column(Integer, index=True, nullable=False)
     place: Union[str, Column] = Column(String, nullable=False)
@@ -41,12 +40,11 @@ class DBActivity(Base):
     def to_entity(self) -> Activity:
         return Activity(
             id=self.id,
-            type=Type.from_int(self.type),
+            type=Type.from_str(self.type),
             category=Category.from_str(self.category),
             name=self.name,
             image_activity=self.image_activity,
             description=self.description,
-            more=self.more,
             start_date=self.start_date,
             end_date=self.end_date,
             place=self.place,
@@ -65,7 +63,6 @@ class DBActivity(Base):
         activity_db_to_update.category = activity.category.value
         activity_db_to_update.name = activity.name
         activity_db_to_update.description = activity.description
-        activity_db_to_update.more = activity.more
         activity_db_to_update.start_date = activity.start_date
         activity_db_to_update.end_date = activity.end_date
         activity_db_to_update.place = activity.place

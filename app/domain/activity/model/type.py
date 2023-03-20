@@ -6,18 +6,15 @@ from app.domain.activity.exception.activity_exception import InvalidTypeExceptio
 
 @dataclass(init=False, eq=True, frozen=True)
 class Type(Enum):
-    activity = 1
-    event = 2
+    activity = 'activity'
+    event = 'event'
 
     @classmethod
-    def from_int(cls, type: int) -> "Type":
+    def from_str(cls, type: str) -> "Type":
         try:
             return cls(type)
         except ValueError:
             raise InvalidTypeException(type) from None
-
-    def to_int(self) -> int:
-        return int(self.value.__str__())
 
     def is_event(self) -> bool:
         return self.value == Type.event.value

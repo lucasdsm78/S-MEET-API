@@ -15,7 +15,6 @@ class Activity:
             type: Type,
             name: str,
             description: str,
-            more: str,
             start_date: int,
             end_date: int,
             place: str,
@@ -32,7 +31,6 @@ class Activity:
         self.category: Category = category
         self.name: str = name
         self.description: str = description
-        self.more: str = more
         self.start_date: int = start_date
         self.end_date: int = end_date
         self.place: str = place
