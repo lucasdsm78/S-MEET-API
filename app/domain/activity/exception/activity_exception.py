@@ -1,7 +1,7 @@
 class InvalidTypeException(Exception):
     message = "This type is not a valid type"
 
-    def __init__(self, type: int):
+    def __init__(self, type: str):
         self.type = type
 
     def __str__(self):

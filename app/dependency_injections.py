@@ -106,12 +106,14 @@ def school_command_usecase(
 def activity_command_usecase(
         activity_repository: ActivityRepository = Depends(activity_repository_dependency),
         user_repository: UserRepository = Depends(user_repository_dependency),
+        school_repository: SchoolRepository = Depends(school_repository_dependency),
         activity_participant_repository: ActivityParticipantRepository =
         Depends(activity_participant_repository_dependency),
 ) -> ActivityCommandUseCase:
     return ActivityCommandUseCaseImpl(
         activity_repository=activity_repository,
         user_repository=user_repository,
+        school_repository=school_repository,
         activity_participant_repository=activity_participant_repository,
     )
 

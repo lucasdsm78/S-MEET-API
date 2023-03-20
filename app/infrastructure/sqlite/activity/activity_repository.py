@@ -42,9 +42,8 @@ class ActivityRepositoryImpl(ActivityRepository):
             activity_db = self.session.query(DBActivity).filter_by(id=activity_id).one()
         except NoResultFound:
             raise ActivityNotFoundError
-        except Exception:
+        except Exception as e:
             raise
-
         return activity_db.to_entity()
 
     def begin(self):
