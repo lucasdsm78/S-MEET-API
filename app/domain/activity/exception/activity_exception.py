@@ -8,6 +8,16 @@ class InvalidTypeException(Exception):
         return f"{self.type} is not a valid type"
 
 
+class InvalidCategoryException(Exception):
+    message = "This category is not a valid category"
+
+    def __init__(self, category: str):
+        self.category = category
+
+    def __str__(self):
+        return f"{self.category} is not a valid category"
+
+
 class ActivitiesNotFoundError(Exception):
     message = "No activities found from the API."
 
