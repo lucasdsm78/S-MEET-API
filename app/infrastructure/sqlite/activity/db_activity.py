@@ -33,6 +33,8 @@ class DBActivity(Base):
     max_members: Union[int, Column] = Column(Integer, nullable=False)
     user_id: Union[int, Column] = Column(Integer, ForeignKey('user.id'))
     user = relationship("DBUser", back_populates='activities')
+    school_id: Union[int, Column] = Column(Integer, ForeignKey('school.id'))
+    school = relationship("DBSchool", back_populates='activity')
     created_at: Union[int, Column] = Column(Integer, index=True, nullable=False)
     updated_at: Union[int, Column] = Column(Integer, index=True, nullable=False)
     activity_participants = relationship("DBActivityParticipants", back_populates="activity")
@@ -52,6 +54,7 @@ class DBActivity(Base):
             user=UserSummary(id=self.user_id, email=Email(self.user.email)),
             created_at=self.created_at,
             updated_at=self.updated_at,
+            school=self.school_id
         )
 
     @staticmethod
@@ -66,6 +69,7 @@ class DBActivity(Base):
         activity_db_to_update.start_date = activity.start_date
         activity_db_to_update.end_date = activity.end_date
         activity_db_to_update.place = activity.place
+        activity_db_to_update.school_id = activity.school
         activity_db_to_update.image_activity = activity.image_activity
         activity_db_to_update.max_members = activity.max_members
         activity_db_to_update.user_id = activity.user.id

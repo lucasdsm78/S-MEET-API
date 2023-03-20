@@ -3,6 +3,7 @@ from typing import Optional
 from pydantic import Field, BaseModel
 
 from app.domain.activity.model.activity import Activity
+from app.domain.user.model.school import School
 
 
 class ActivityReadModel(BaseModel):
@@ -10,6 +11,7 @@ class ActivityReadModel(BaseModel):
 
     id: int
     type: str
+    school: int
     category: str
     name: str = Field(example="Sortie à la ptinoire")
     description: str = Field(example="Sortie à la patinoire à 12h00")
@@ -33,6 +35,7 @@ class ActivityReadModel(BaseModel):
             type=activity.type.value,
             category=activity.category.value,
             name=activity.name,
+            school=activity.school,
             description=activity.description,
             start_date=activity.start_date,
             end_date=activity.end_date,
@@ -49,6 +52,7 @@ class ActivityReadModel(BaseModel):
         return ActivityReadModel(
             id=activity.id,
             type=activity.type.value,
+            school=activity.school,
             category=activity.category.value,
             name=activity.name,
             description=activity.description,

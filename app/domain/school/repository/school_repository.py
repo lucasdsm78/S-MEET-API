@@ -20,5 +20,9 @@ class SchoolRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def find_by_id(self, school_id: int) -> Optional[School]:
+        raise NotImplementedError
+
+    @abstractmethod
     def rollback(self):
         raise NotImplementedError

@@ -24,6 +24,16 @@ class SchoolRepositoryImpl(SchoolRepository):
 
         return school_db.to_entity()
 
+    def find_by_id(self, school_id: int) -> Optional[School]:
+        try:
+            school_db = self.session.query(DBSchool).filter_by(id=school_id).one()
+        except NoResultFound:
+            return None
+        except:
+            raise
+
+        return school_db.to_entity()
+
     def create(self, school: School):
         school_db = DBSchool.from_entity(school)
         try:

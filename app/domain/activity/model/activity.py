@@ -14,6 +14,7 @@ class Activity:
             self,
             type: Type,
             name: str,
+            school: int,
             description: str,
             start_date: int,
             end_date: int,
@@ -33,6 +34,7 @@ class Activity:
         self.description: str = description
         self.start_date: int = start_date
         self.end_date: int = end_date
+        self.school: int = school
         self.place: str = place
         self.image_activity: str = image_activity
         self.user: UserSummary = user

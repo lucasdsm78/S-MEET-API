@@ -9,6 +9,7 @@ class ActivityCreateModel(BaseModel):
     description: str = Field(example="manger midi chez kfc à pontoise")
     start_date: int
     end_date: int
+    school_id: int
     place: str = Field(example="Cergy")
     image_activity: str
     category: str = Field(example='after_work')
