@@ -32,7 +32,7 @@ async def create_activity(
         # current_user: dict = Depends(current_user)
 ):
     try:
-        activity = activity_command_usecase.create(data, 'lucas@esieeit.fr')
+        activity = activity_command_usecase.create(data, 'alyssia.prevotehauguel@esieeit.fr')
 
     except Exception as e:
         raise
