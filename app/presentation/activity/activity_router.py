@@ -29,10 +29,10 @@ router = APIRouter(
 async def create_activity(
         data: ActivityCreateModel,
         activity_command_usecase: ActivityCommandUseCase = Depends(activity_command_usecase),
-        # current_user: dict = Depends(current_user)
+        current_user: dict = Depends(current_user)
 ):
     try:
-        activity = activity_command_usecase.create(data, 'alyssia.prevotehauguel@esieeit.fr')
+        activity = activity_command_usecase.create(data, current_user.get('', 'email'))
 
     except Exception as e:
         raise
@@ -108,10 +108,10 @@ async def get_activity(
 async def participate_activity(
         activity_id: int,
         activity_command_usecase: ActivityCommandUseCase = Depends(activity_command_usecase),
-        # current_user: dict = Depends(current_user),
+        current_user: dict = Depends(current_user),
 ):
     try:
-        activity_participant = activity_command_usecase.add_participant(activity_id, 'lucas@esieeit.fr')
+        activity_participant = activity_command_usecase.add_participant(activity_id, current_user.get('', 'email'))
 
     except ActivityNotFoundError as e:
         raise HTTPException(
