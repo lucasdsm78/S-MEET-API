@@ -37,5 +37,6 @@ class User:
             pseudo=self.pseudo,
             first_name=self.first_name,
             last_name=self.last_name,
-            school=self.school.name
+            school=self.school.name,
+            id=self.id
         )
