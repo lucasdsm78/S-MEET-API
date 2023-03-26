@@ -47,7 +47,10 @@ class ActivityCommandUseCaseImpl(ActivityCommandUseCase):
 
     def create(self, email: str, data: ActivityCreateModel) -> ActivityCreateResponse:
         try:
+            # Récupération de l'utilisateur connecté
             user = self.user_repository.find_by_email(email)
+
+            # Envoi d'une requête pour savoir si l'école existe bien
             school = self.school_repository.find_by_id(data.school_id)
 
             activity = Activity(
@@ -64,6 +67,7 @@ class ActivityCommandUseCaseImpl(ActivityCommandUseCase):
                 user=UserSummary(id=user.id, email=user.email),
             )
 
+            # Enregistrement dans la base de données
             self.activity_repository.create(activity)
             self.activity_repository.commit()
         except:
@@ -74,7 +78,10 @@ class ActivityCommandUseCaseImpl(ActivityCommandUseCase):
 
     def add_participant(self, activity_id: int, email: str) -> ActivityParticipateResponse:
         try:
+            # Récupération du model user de l'utilisateur connecté
             user = self.user_repository.find_by_email(email)
+
+            # Récupération de l'activité choisie par l'utilisateur
             activity = self.activity_repository.find_by_id(activity_id)
 
             activity_participant = ActivityParticipant(
@@ -82,6 +89,7 @@ class ActivityCommandUseCaseImpl(ActivityCommandUseCase):
                 activity_id=activity.id
             )
 
+            # Insertion dans la base de données activity_participants
             self.activity_participant_repository.add_participant(activity_participant)
             self.activity_participant_repository.commit()
         except:
