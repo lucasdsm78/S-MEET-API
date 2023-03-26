@@ -20,7 +20,7 @@ class ActivityCommandUseCase(ABC):
     """ActivityCommandUseCase defines a command usecase inteface related Activity entity."""
 
     @abstractmethod
-    def create(self, activity_create_model: ActivityCreateModel, email: str) -> ActivityCreateResponse:
+    def create(self, email: str, activity_create_model: ActivityCreateModel) -> ActivityCreateResponse:
         raise NotImplementedError
 
     @abstractmethod
