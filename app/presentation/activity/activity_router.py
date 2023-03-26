@@ -81,10 +81,10 @@ async def get_activities(
 async def get_activity(
         activity_id: int,
         activity_query_usecase: ActivityQueryUseCase = Depends(activity_query_usecase),
-        # current_user: dict = Depends(current_user),
+        current_user: dict = Depends(current_user),
 ):
     try:
-        activity = activity_query_usecase.get_activity_by_id(activity_id, 'lucas@esieeit.fr')
+        activity = activity_query_usecase.get_activity_by_id(activity_id, current_user.get('', 'email'))
     except ActivityNotFoundError as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -147,12 +147,12 @@ async def participate_activity(
 async def cancel_participation_activity(
         activity_id: int,
         activity_command_usecase: ActivityCommandUseCase = Depends(activity_command_usecase),
-        # current_user: dict = Depends(current_user),
+        current_user: dict = Depends(current_user),
 ):
     try:
         cancel_participation_activity = activity_command_usecase.delete_participant(
             activity_id,
-            'lucas@esieeit.fr'
+            current_user.get('', 'email')
         )
     except UserNotFoundError as e:
         raise HTTPException(
