@@ -29,6 +29,7 @@ class TestActivityCommandUseCase:
         )
 
         result = activity_command_usecase.create(
+            'test@esieeit.fr',
             ActivityCreateModel(
                 type='activity',
                 name='test',
@@ -40,8 +41,7 @@ class TestActivityCommandUseCase:
                 image_activity='https://www.image.png',
                 category='repas',
                 max_members=50,
-            ),
-            'test@esieeit.fr'
+            )
         )
 
         assert isinstance(result, ActivityCreateResponse)

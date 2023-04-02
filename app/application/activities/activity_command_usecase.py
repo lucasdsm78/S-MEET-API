@@ -20,7 +20,7 @@ class ActivityCommandUseCase(ABC):
     """ActivityCommandUseCase defines a command usecase inteface related Activity entity."""
 
     @abstractmethod
-    def create(self, email: str, activity_create_model: ActivityCreateModel) -> ActivityCreateResponse:
+    def create(self, email: str, activity_create_model: ActivityCreateModel):
         raise NotImplementedError
 
     @abstractmethod
@@ -46,7 +46,7 @@ class ActivityCommandUseCaseImpl(ActivityCommandUseCase):
         self.school_repository: SchoolRepository = school_repository
         self.activity_participant_repository: ActivityParticipantRepository = activity_participant_repository
 
-    def create(self, data: ActivityCreateModel, email: str) -> ActivityCreateResponse:
+    def create(self, email: str, data: ActivityCreateModel) -> ActivityCreateResponse:
         try:
             # Récupération de l'utilisateur connecté
             user = self.user_repository.find_by_email(email)
