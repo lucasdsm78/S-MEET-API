@@ -10,6 +10,7 @@ from app.domain.activity.repository.activity_repository import ActivityRepositor
 from app.domain.school.repository.school_repository import SchoolRepository
 from app.domain.services.hash import Hash
 from app.domain.services.manager_token import ManagerToken
+from app.domain.services.socket_manager.socket_manager import SocketManager
 from app.domain.user.repository.user_repository import UserRepository
 from app.infrastructure.config import Settings
 
@@ -23,6 +24,7 @@ from app.infrastructure.services.authentication import AuthenticationToken
 from app.infrastructure.services.hash import HashImpl
 from app.infrastructure.services.jwt_bearer import JwtBearer
 from app.infrastructure.services.manager_token import JwtManagerTokenImpl
+from app.infrastructure.services.socket_manager.socket_manager import SocketManagerImpl
 from app.infrastructure.sqlite.activity.activity_participant_repository import ActivityParticipantRepositoryImpl
 from app.infrastructure.sqlite.activity.activity_repository import ActivityRepositoryImpl
 from app.infrastructure.sqlite.database import create_tables, SessionLocal
@@ -46,6 +48,10 @@ def get_session() -> Iterator[Session]:
 @lru_cache()
 def get_settings() -> Settings:
     return Settings()
+
+
+def socket_manager_dependency() -> SocketManager:
+    return SocketManagerImpl()
 
 
 def manager_token_dependency(settings: Settings = Depends(get_settings)) -> ManagerToken:
