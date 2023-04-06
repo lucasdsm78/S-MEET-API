@@ -2,11 +2,15 @@ from fastapi.security import HTTPBearer
 
 from app.application.activities.activity_command_usecase import ActivityCommandUseCase, ActivityCommandUseCaseImpl
 from app.application.activities.activity_query_usecase import ActivityQueryUseCase, ActivityQueryUseCaseImpl
+from app.application.chat.room.room_command_usecase import RoomCommandUseCase, RoomCommandUseCaseImpl
+from app.application.chat.room.room_query_usecase import RoomQueryUseCase, RoomQueryUseCaseImpl
 from app.application.school.school_command_usecase import SchoolCommandUseCase, SchoolCommandUseCaseImpl
 from app.application.user.user_command_usecase import UserCommandUseCase, UserCommandUseCaseImpl
 from app.application.user.user_query_usecase import UserQueryUseCase, UserQueryUseCaseImpl
 from app.domain.activity.repository.activity_participant_repository import ActivityParticipantRepository
 from app.domain.activity.repository.activity_repository import ActivityRepository
+from app.domain.chat.room.repository.room_participant_repository import RoomParticipantRepository
+from app.domain.chat.room.repository.room_repository import RoomRepository
 from app.domain.school.repository.school_repository import SchoolRepository
 from app.domain.services.hash import Hash
 from app.domain.services.manager_token import ManagerToken
@@ -79,6 +83,14 @@ def activity_participant_repository_dependency(session: Session = Depends(get_se
     return ActivityParticipantRepositoryImpl(session)
 
 
+def room_repository_dependency(session: Session = Depends(get_session)) -> RoomRepository:
+    return RoomRepositoryImpl(session)
+
+
+def room_participant_repository_dependency(session: Session = Depends(get_session)) -> RoomParticipantRepository:
+    return RoomParticipantRepositoryImpl(session)
+
+
 def user_command_usecase(
         user_repository: UserRepository = Depends(user_repository_dependency),
         school_repository: SchoolRepository = Depends(school_repository_dependency),
@@ -134,6 +146,32 @@ def activity_query_usecase(
         activity_repository=activity_repository,
         user_repository=user_repository,
         activity_participant_repository=activity_participant_repository
+    )
+
+
+def room_query_usecase(
+        room_repository: RoomRepository = Depends(room_repository_dependency),
+        room_participant_repository: RoomParticipantRepository =
+        Depends(room_participant_repository_dependency),
+) -> RoomQueryUseCase:
+    return RoomQueryUseCaseImpl(
+        room_repository=room_repository,
+        room_participant_repository=room_participant_repository
+    )
+
+
+def room_command_usecase(
+        room_repository: RoomRepository = Depends(room_repository_dependency),
+        user_repository: UserRepository = Depends(user_repository_dependency),
+        school_repository: SchoolRepository = Depends(school_repository_dependency),
+        room_participant_repository: RoomParticipantRepository =
+        Depends(room_participant_repository_dependency),
+) -> RoomCommandUseCase:
+    return RoomCommandUseCaseImpl(
+        room_repository=room_repository,
+        school_repository=school_repository,
+        user_repository=user_repository,
+        room_participant_repository=room_participant_repository
     )
 
 

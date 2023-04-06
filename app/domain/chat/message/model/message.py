@@ -2,7 +2,7 @@ from typing import Optional, List
 
 
 class Message:
-    """Room represents your collection of rooms as an entity."""
+    """Message represents your collection of messages as an entity."""
 
     def __init__(
             self,
