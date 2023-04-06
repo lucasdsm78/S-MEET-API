@@ -12,19 +12,20 @@ class Room:
             self,
             name: str,
             description: str,
-            school: int,
+            school_id: int,
             image_room: str,
             id: Optional[int] = None,
+            users: Optional[list] = None,
             created_at: Optional[int] = None,
             updated_at: Optional[int] = None,
     ):
         self.id: Optional[int] = id
         self.name: str = name
         self.description: str = description
-        self.school: int = school
+        self.school_id: int = school_id
         self.image_room: str = image_room
         self.messages = []
-        self.users = []
+        self.users = users
         self.created_at: Optional[int] = created_at
         self.updated_at: Optional[int] = updated_at
 

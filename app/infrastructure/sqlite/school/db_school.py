@@ -13,6 +13,7 @@ class DBSchool(Base):
     name: Union[str, Column] = Column(String, nullable=False)
     user = relationship("DBUser", back_populates="school")
     activity = relationship("DBActivity", back_populates="school")
+    room = relationship("DBRoom", back_populates="school")
 
     def to_entity(self) -> School:
         return School(

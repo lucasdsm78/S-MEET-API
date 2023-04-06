@@ -12,11 +12,19 @@ class RoomParticipantRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def delete_participant_room(self, room_participant_id: int):
+        raise NotImplementedError
+
+    @abstractmethod
     def find_conversations_by_user(self, user_id: int) -> List[RoomParticipant]:
         raise NotImplementedError
 
     @abstractmethod
     def find_participants_by_room(self, room_id: int) -> List[RoomParticipant]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_participation_room(self, room_id: int, user_id: int) -> Optional[RoomParticipant]:
         raise NotImplementedError
 
     @abstractmethod
