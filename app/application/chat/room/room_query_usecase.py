@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from app.application.chat.room.room_query_model import RoomReadModel, \
     ListConversationResponse, ListParticipationsRoomResponse
 from app.domain.chat.room.exception.room_exception import RoomNotFoundError
+from app.domain.chat.room.model.room import Room
 from app.domain.chat.room.repository.room_participant_repository import RoomParticipantRepository
 from app.domain.chat.room.repository.room_repository import RoomRepository
 
@@ -13,7 +14,7 @@ from app.domain.chat.room.repository.room_repository import RoomRepository
 class RoomQueryUseCase(ABC):
 
     @abstractmethod
-    def find_room_by_id(self, room_id: int) -> Optional[RoomReadModel]:
+    def find_room_by_id(self, room_id: int) -> Room:
         raise NotImplementedError
 
     @abstractmethod
@@ -32,7 +33,7 @@ class RoomQueryUseCaseImpl(RoomQueryUseCase, BaseModel):
     class Config:
         arbitrary_types_allowed = True
 
-    def find_room_by_id(self, room_id: int) -> Optional[RoomReadModel]:
+    def find_room_by_id(self, room_id: int) -> Room:
         try:
             room = self.room_repository.find_room_by_id(room_id)
             if room is None:
@@ -40,7 +41,7 @@ class RoomQueryUseCaseImpl(RoomQueryUseCase, BaseModel):
         except:
             raise
 
-        return RoomReadModel.from_entity(room)
+        return room
 
     def fetch_conversations_by_user(self, user_id: int) -> dict:
         try:
@@ -62,4 +63,5 @@ class RoomQueryUseCaseImpl(RoomQueryUseCase, BaseModel):
                     user=user), participations))
             )
         except Exception as e:
+            print(e)
             raise

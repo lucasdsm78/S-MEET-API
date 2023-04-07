@@ -1,14 +1,16 @@
 from abc import ABC, abstractmethod
 from typing import Optional, List
 
+from app.domain.chat.room.model.room import Room
 from app.domain.chat.room.model.room_participant import RoomParticipant
+from app.domain.user.model.user import User
 
 
 class RoomParticipantRepository(ABC):
     """RoomParticipantRepository defines a repository interface for RoomParticipantRepository entity."""
 
     @abstractmethod
-    def add_participant(self, room_participant: RoomParticipant) -> Optional[RoomParticipant]:
+    def add_participant(self, room_participant: RoomParticipant):
         raise NotImplementedError
 
     @abstractmethod
@@ -16,11 +18,11 @@ class RoomParticipantRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def find_conversations_by_user(self, user_id: int) -> List[RoomParticipant]:
+    def find_conversations_by_user(self, user_id: int) -> List[Room]:
         raise NotImplementedError
 
     @abstractmethod
-    def find_participants_by_room(self, room_id: int) -> List[RoomParticipant]:
+    def find_participants_by_room(self, room_id: int) -> List[User]:
         raise NotImplementedError
 
     @abstractmethod

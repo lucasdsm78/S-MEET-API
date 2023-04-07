@@ -10,3 +10,10 @@ class RoomsNotFoundError(Exception):
 
     def __str__(self):
         return RoomsNotFoundError.message
+
+
+class RoomParticipantNotFoundError(Exception):
+    message = "You are not participating in this room."
+
+    def __str__(self):
+        return RoomParticipantNotFoundError.message

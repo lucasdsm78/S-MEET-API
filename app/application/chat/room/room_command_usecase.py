@@ -78,11 +78,9 @@ class RoomCommandUseCaseImpl(RoomCommandUseCase):
         try:
             user = self.user_repository.find_by_id(user_id)
 
-            room = self.room_repository.find_room_by_id(room_id)
-
             room_participant = RoomParticipant(
                 user_id=user.id,
-                room_id=room.id
+                room_id=room_id
             )
 
             self.room_participant_repository.add_participant(room_participant)
