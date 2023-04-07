@@ -1,4 +1,4 @@
-from typing import Dict, Union
+from typing import Dict, Union, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi import WebSocket, WebSocketDisconnect
@@ -9,7 +9,7 @@ from app.application.chat.room.room_command_model import RoomCreateResponse, Roo
     RoomCancelParticipationResponse
 from app.application.chat.room.room_command_usecase import RoomCommandUseCase
 from app.application.chat.room.room_query_usecase import RoomQueryUseCase
-from app.dependency_injections import current_user, room_repository_dependency, room_command_usecase, room_query_usecase
+from app.dependency_injections import current_user, room_repository_dependency, room_command_usecase, room_query_usecase, message_repository_dependency
 from app.domain.chat.message.model.message import Message
 from app.domain.chat.room.exception.room_exception import RoomNotFoundError, RoomsNotFoundError
 from app.domain.user.exception.user_exception import UserNotFoundError, UsersNotFoundError
@@ -73,7 +73,7 @@ async def room_endpoint(
         websocket: WebSocket,
         room_id: int,
         room_query_usecase: RoomQueryUseCase = Depends(room_repository_dependency),
-        message_query_usecase: MessageQueryUseCase = Depends(message_repository_dependency),
+        # message_command_usecase: MessageCommandUseCase = Depends(message_repository_dependency),
         current_user: dict = Depends(current_user)
 ):
     room = room_query_usecase.find_room_by_id(room_id)
@@ -99,7 +99,7 @@ async def room_endpoint(
                 user_id=current_user.get('id', '')
             )
 
-            message_query_usecase.create(message)
+            # message_command_usecase.create(message)
             room.messages.append(message)
 
             for user in room.users:
@@ -205,7 +205,7 @@ async def participate_room(
 )
 async def cancel_participation_room(
         room_id: int,
-        user_id: int,
+        user_id: Optional[int] = None,
         room_command_usecase: RoomCommandUseCase = Depends(room_command_usecase),
         current_user: dict = Depends(current_user),
 ):

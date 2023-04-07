@@ -9,6 +9,7 @@ from app.application.user.user_command_usecase import UserCommandUseCase, UserCo
 from app.application.user.user_query_usecase import UserQueryUseCase, UserQueryUseCaseImpl
 from app.domain.activity.repository.activity_participant_repository import ActivityParticipantRepository
 from app.domain.activity.repository.activity_repository import ActivityRepository
+from app.domain.chat.message.repository.message_repository import MessageRepository
 from app.domain.chat.room.repository.room_participant_repository import RoomParticipantRepository
 from app.domain.chat.room.repository.room_repository import RoomRepository
 from app.domain.school.repository.school_repository import SchoolRepository
@@ -31,6 +32,9 @@ from app.infrastructure.services.manager_token import JwtManagerTokenImpl
 from app.infrastructure.services.socket_manager.socket_manager import SocketManagerImpl
 from app.infrastructure.sqlite.activity.activity_participant_repository import ActivityParticipantRepositoryImpl
 from app.infrastructure.sqlite.activity.activity_repository import ActivityRepositoryImpl
+from app.infrastructure.sqlite.chat.message.message_repository import MessageRepositoryImpl
+from app.infrastructure.sqlite.chat.room.room_participant_repository import RoomParticipantRepositoryImpl
+from app.infrastructure.sqlite.chat.room.room_repository import RoomRepositoryImpl
 from app.infrastructure.sqlite.database import create_tables, SessionLocal
 from app.infrastructure.sqlite.school.school_repository import SchoolRepositoryImpl
 from app.infrastructure.sqlite.user.user_repository import UserRepositoryImpl
@@ -85,6 +89,10 @@ def activity_participant_repository_dependency(session: Session = Depends(get_se
 
 def room_repository_dependency(session: Session = Depends(get_session)) -> RoomRepository:
     return RoomRepositoryImpl(session)
+
+
+def message_repository_dependency(session: Session = Depends(get_session)) -> MessageRepository:
+    return MessageRepositoryImpl(session)
 
 
 def room_participant_repository_dependency(session: Session = Depends(get_session)) -> RoomParticipantRepository:
