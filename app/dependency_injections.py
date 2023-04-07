@@ -2,6 +2,7 @@ from fastapi.security import HTTPBearer
 
 from app.application.activities.activity_command_usecase import ActivityCommandUseCase, ActivityCommandUseCaseImpl
 from app.application.activities.activity_query_usecase import ActivityQueryUseCase, ActivityQueryUseCaseImpl
+from app.application.chat.message.message_command_usecase import MessageCommandUseCase, MessageCommandUseCaseImpl
 from app.application.chat.room.room_command_usecase import RoomCommandUseCase, RoomCommandUseCaseImpl
 from app.application.chat.room.room_query_usecase import RoomQueryUseCase, RoomQueryUseCaseImpl
 from app.application.school.school_command_usecase import SchoolCommandUseCase, SchoolCommandUseCaseImpl
@@ -180,6 +181,18 @@ def room_command_usecase(
         school_repository=school_repository,
         user_repository=user_repository,
         room_participant_repository=room_participant_repository
+    )
+
+
+def message_command_usecase(
+        message_repository: MessageRepository = Depends(message_repository_dependency),
+        user_repository: UserRepository = Depends(user_repository_dependency),
+        room_repository: RoomRepository = Depends(room_repository_dependency),
+) -> MessageCommandUseCase:
+    return MessageCommandUseCaseImpl(
+        message_repository=message_repository,
+        user_repository=user_repository,
+        room_repository=room_repository
     )
 
 

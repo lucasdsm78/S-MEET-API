@@ -4,12 +4,14 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi import WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
 
-from app.application.chat.message.message_query_usecase import MessageQueryUseCase
+from app.application.chat.message.message_command_model import MessageCreateResponse, MessageCreateModel
+from app.application.chat.message.message_command_usecase import MessageCommandUseCase
 from app.application.chat.room.room_command_model import RoomCreateResponse, RoomCreateModel, RoomParticipateResponse, \
     RoomCancelParticipationResponse
 from app.application.chat.room.room_command_usecase import RoomCommandUseCase
 from app.application.chat.room.room_query_usecase import RoomQueryUseCase
-from app.dependency_injections import current_user, room_repository_dependency, room_command_usecase, room_query_usecase, message_repository_dependency
+from app.dependency_injections import current_user, room_repository_dependency, room_command_usecase, \
+    room_query_usecase, message_repository_dependency, message_command_usecase
 from app.domain.chat.message.model.message import Message
 from app.domain.chat.room.exception.room_exception import RoomNotFoundError, RoomsNotFoundError
 from app.domain.user.exception.user_exception import UserNotFoundError, UsersNotFoundError
@@ -298,3 +300,23 @@ async def get_participations_by_room(
         )
 
     return participations
+
+
+@router.post(
+    "/message/create",
+    response_model=MessageCreateResponse,
+    summary="Create a message",
+    status_code=status.HTTP_200_OK
+)
+async def create_message(
+        data: MessageCreateModel,
+        message_command_usecase: MessageCommandUseCase = Depends(message_command_usecase),
+        current_user: dict = Depends(current_user)
+):
+    try:
+        message = message_command_usecase.create(data, current_user.get('id', ''))
+
+    except Exception as e:
+        raise
+
+    return message
