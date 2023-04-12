@@ -31,7 +31,9 @@ class DBUser(Base):
     school_id: Union[int, Column] = Column(Integer, ForeignKey('school.id'))
     school = relationship("DBSchool", back_populates='user')
     activities = relationship("DBActivity", back_populates="user")
+    messages = relationship("DBMessage", back_populates="user")
     activity_participants = relationship("DBActivityParticipants", back_populates="user")
+    room_participants = relationship("DBRoomParticipants", back_populates="user")
 
     def to_entity(self) -> User:
         return User(

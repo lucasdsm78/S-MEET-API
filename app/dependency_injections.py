@@ -2,14 +2,22 @@ from fastapi.security import HTTPBearer
 
 from app.application.activities.activity_command_usecase import ActivityCommandUseCase, ActivityCommandUseCaseImpl
 from app.application.activities.activity_query_usecase import ActivityQueryUseCase, ActivityQueryUseCaseImpl
+from app.application.chat.message.message_command_usecase import MessageCommandUseCase, MessageCommandUseCaseImpl
+from app.application.chat.message.message_query_usecase import MessageQueryUseCase, MessageQueryUseCaseImpl
+from app.application.chat.room.room_command_usecase import RoomCommandUseCase, RoomCommandUseCaseImpl
+from app.application.chat.room.room_query_usecase import RoomQueryUseCase, RoomQueryUseCaseImpl
 from app.application.school.school_command_usecase import SchoolCommandUseCase, SchoolCommandUseCaseImpl
 from app.application.user.user_command_usecase import UserCommandUseCase, UserCommandUseCaseImpl
 from app.application.user.user_query_usecase import UserQueryUseCase, UserQueryUseCaseImpl
 from app.domain.activity.repository.activity_participant_repository import ActivityParticipantRepository
 from app.domain.activity.repository.activity_repository import ActivityRepository
+from app.domain.chat.message.repository.message_repository import MessageRepository
+from app.domain.chat.room.repository.room_participant_repository import RoomParticipantRepository
+from app.domain.chat.room.repository.room_repository import RoomRepository
 from app.domain.school.repository.school_repository import SchoolRepository
 from app.domain.services.hash import Hash
 from app.domain.services.manager_token import ManagerToken
+from app.domain.services.socket_manager.socket_manager import SocketManager
 from app.domain.user.repository.user_repository import UserRepository
 from app.infrastructure.config import Settings
 
@@ -23,8 +31,12 @@ from app.infrastructure.services.authentication import AuthenticationToken
 from app.infrastructure.services.hash import HashImpl
 from app.infrastructure.services.jwt_bearer import JwtBearer
 from app.infrastructure.services.manager_token import JwtManagerTokenImpl
+from app.infrastructure.services.socket_manager.socket_manager import SocketManagerImpl
 from app.infrastructure.sqlite.activity.activity_participant_repository import ActivityParticipantRepositoryImpl
 from app.infrastructure.sqlite.activity.activity_repository import ActivityRepositoryImpl
+from app.infrastructure.sqlite.chat.message.message_repository import MessageRepositoryImpl
+from app.infrastructure.sqlite.chat.room.room_participant_repository import RoomParticipantRepositoryImpl
+from app.infrastructure.sqlite.chat.room.room_repository import RoomRepositoryImpl
 from app.infrastructure.sqlite.database import create_tables, SessionLocal
 from app.infrastructure.sqlite.school.school_repository import SchoolRepositoryImpl
 from app.infrastructure.sqlite.user.user_repository import UserRepositoryImpl
@@ -46,6 +58,10 @@ def get_session() -> Iterator[Session]:
 @lru_cache()
 def get_settings() -> Settings:
     return Settings()
+
+
+def socket_manager_dependency() -> SocketManager:
+    return SocketManagerImpl()
 
 
 def manager_token_dependency(settings: Settings = Depends(get_settings)) -> ManagerToken:
@@ -71,6 +87,18 @@ def activity_repository_dependency(session: Session = Depends(get_session)) -> A
 def activity_participant_repository_dependency(session: Session = Depends(get_session)) \
         -> ActivityParticipantRepository:
     return ActivityParticipantRepositoryImpl(session)
+
+
+def room_repository_dependency(session: Session = Depends(get_session)) -> RoomRepository:
+    return RoomRepositoryImpl(session)
+
+
+def message_repository_dependency(session: Session = Depends(get_session)) -> MessageRepository:
+    return MessageRepositoryImpl(session)
+
+
+def room_participant_repository_dependency(session: Session = Depends(get_session)) -> RoomParticipantRepository:
+    return RoomParticipantRepositoryImpl(session)
 
 
 def user_command_usecase(
@@ -128,6 +156,54 @@ def activity_query_usecase(
         activity_repository=activity_repository,
         user_repository=user_repository,
         activity_participant_repository=activity_participant_repository
+    )
+
+
+def room_query_usecase(
+        room_repository: RoomRepository = Depends(room_repository_dependency),
+        room_participant_repository: RoomParticipantRepository =
+        Depends(room_participant_repository_dependency),
+) -> RoomQueryUseCase:
+    return RoomQueryUseCaseImpl(
+        room_repository=room_repository,
+        room_participant_repository=room_participant_repository
+    )
+
+
+def room_command_usecase(
+        room_repository: RoomRepository = Depends(room_repository_dependency),
+        user_repository: UserRepository = Depends(user_repository_dependency),
+        school_repository: SchoolRepository = Depends(school_repository_dependency),
+        room_participant_repository: RoomParticipantRepository =
+        Depends(room_participant_repository_dependency),
+) -> RoomCommandUseCase:
+    return RoomCommandUseCaseImpl(
+        room_repository=room_repository,
+        school_repository=school_repository,
+        user_repository=user_repository,
+        room_participant_repository=room_participant_repository
+    )
+
+
+def message_command_usecase(
+        message_repository: MessageRepository = Depends(message_repository_dependency),
+        user_repository: UserRepository = Depends(user_repository_dependency),
+        room_repository: RoomRepository = Depends(room_repository_dependency),
+) -> MessageCommandUseCase:
+    return MessageCommandUseCaseImpl(
+        message_repository=message_repository,
+        user_repository=user_repository,
+        room_repository=room_repository
+    )
+
+
+def message_query_usecase(
+        room_repository: RoomRepository = Depends(room_repository_dependency),
+        message_repository: MessageRepository = Depends(message_repository_dependency),
+) -> MessageQueryUseCase:
+    return MessageQueryUseCaseImpl(
+        room_repository=room_repository,
+        message_repository=message_repository
     )
 
 
