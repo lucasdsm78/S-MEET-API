@@ -17,7 +17,7 @@ router = APIRouter(
 
 @router.post(
     "/user/create",
-    response_model=UserCreateResponse,
+    response_model=UserLoginResponse,
     summary="Create a user",
     status_code=status.HTTP_200_OK,
     responses={
