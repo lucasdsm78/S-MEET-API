@@ -18,7 +18,7 @@ class UserCommandUseCase(ABC):
     """UserCommandUseCase defines a command usecase inteface related User entity."""
 
     @abstractmethod
-    def create(self, user_create_model: UserCreateModel):
+    def create(self, user_create_model: UserCreateModel) -> UserLoginResponse:
         raise NotImplementedError
 
     @abstractmethod
@@ -41,7 +41,7 @@ class UserCommandUseCaseImpl(UserCommandUseCase):
         self.hasher = hasher
         self.manager_token = manager_token
 
-    def create(self, data: UserCreateModel) -> UserCreateResponse:
+    def create(self, data: UserCreateModel) -> UserLoginResponse:
         try:
             school = self.school_repository.find_by_id(data.school)
 
@@ -61,11 +61,18 @@ class UserCommandUseCaseImpl(UserCommandUseCase):
             self.user_repository.create(user)
             self.user_repository.commit()
 
+            user = self.user_repository.find_by_email(data.email)
+            if not user:
+                raise UserLoginNotFoundError(data.email)
+
         except:
             self.user_repository.rollback()
             raise
 
-        return UserCreateResponse()
+        return UserLoginResponse(
+            tokenAuth=self.manager_token.generate_token_login(user),
+            tokenExpiration=self.manager_token.generate_expiration_token_login(user),
+        )
 
     def login(self, user_login_model: UserLoginModel) -> UserLoginResponse:
         user = self.user_repository.find_by_email(user_login_model.email)
