@@ -36,8 +36,8 @@ class RoomParticipantRepositoryImpl(RoomParticipantRepository):
     def find_conversations_by_user(self, user_id: int) -> List[Room]:
         try:
             rooms_dbs = (
-                self.session.query(DBRoomParticipants)
-                .join(DBRoom)
+                self.session.query(DBRoom)
+                .join(DBRoomParticipants)
                 .filter(DBRoom.id == DBRoomParticipants.room_id)
                 .join(DBUser)
                 .filter(DBRoomParticipants.user_id == DBUser.id)

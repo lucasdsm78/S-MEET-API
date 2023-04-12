@@ -236,6 +236,7 @@ async def cancel_participation_room(
         )
 
     except Exception as e:
+        print(e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
@@ -244,7 +245,7 @@ async def cancel_participation_room(
 
 
 @router.get(
-    "/conversations/user/{id}",
+    "/conversations",
     response_model=dict,
     status_code=status.HTTP_200_OK,
     responses={
@@ -253,12 +254,12 @@ async def cancel_participation_room(
         }
     }
 )
-async def get_conversations_by_user(
-        user_id: int,
+async def get_conversations(
+        current_user: dict = Depends(current_user),
         room_query_usecase: RoomQueryUseCase = Depends(room_query_usecase),
 ):
     try:
-        conversations = room_query_usecase.fetch_conversations_by_user(user_id=user_id)
+        conversations = room_query_usecase.fetch_conversations_by_user(user_id=current_user.get('id', ''))
 
     except Exception as e:
         raise HTTPException(
