@@ -19,7 +19,8 @@ from app.domain.chat.room.exception.room_exception import RoomNotFoundError, Roo
 from app.domain.user.exception.user_exception import UserNotFoundError, UsersNotFoundError
 from app.infrastructure.services.socket_manager.socket_manager import SocketManagerImpl
 from app.presentation.chat.chat_error_message import ErrorMessageRoomNotFound, ErrorMessageRoomsNotFound
-from app.presentation.user.user_error_message import ErrorMessageUserNotFound, ErrorMessageUsersNotFound
+from app.presentation.user.user_error_message import ErrorMessageUserNotFound, ErrorMessageUsersNotFound, \
+    ErrorMessagesRoomNotFound
 
 router = APIRouter(
     tags=['chat']
@@ -330,7 +331,7 @@ async def create_message(
     status_code=status.HTTP_200_OK,
     responses={
         status.HTTP_404_NOT_FOUND: {
-            "model": MessagesNotFoundError,
+            "model": ErrorMessagesRoomNotFound,
         }
     }
 )
