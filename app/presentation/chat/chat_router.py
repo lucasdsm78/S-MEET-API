@@ -6,12 +6,14 @@ from fastapi.responses import HTMLResponse
 
 from app.application.chat.message.message_command_model import MessageCreateResponse, MessageCreateModel
 from app.application.chat.message.message_command_usecase import MessageCommandUseCase
+from app.application.chat.message.message_query_usecase import MessageQueryUseCase
 from app.application.chat.room.room_command_model import RoomCreateResponse, RoomCreateModel, RoomParticipateResponse, \
     RoomCancelParticipationResponse
 from app.application.chat.room.room_command_usecase import RoomCommandUseCase
 from app.application.chat.room.room_query_usecase import RoomQueryUseCase
 from app.dependency_injections import current_user, room_repository_dependency, room_command_usecase, \
-    room_query_usecase, message_repository_dependency, message_command_usecase
+    room_query_usecase, message_repository_dependency, message_command_usecase, message_query_usecase
+from app.domain.chat.message.exception.message_exception import MessagesNotFoundError
 from app.domain.chat.message.model.message import Message
 from app.domain.chat.room.exception.room_exception import RoomNotFoundError, RoomsNotFoundError
 from app.domain.user.exception.user_exception import UserNotFoundError, UsersNotFoundError
@@ -320,3 +322,34 @@ async def create_message(
         raise
 
     return message
+
+
+@router.get(
+    "/messages/{room_id}",
+    response_model=dict,
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "model": MessagesNotFoundError,
+        }
+    }
+)
+async def get_messages_by_room(
+        room_id: int,
+        message_query_usecase: MessageQueryUseCase = Depends(message_query_usecase),
+):
+    try:
+        messages = message_query_usecase.find_messages_by_room(room_id=room_id)
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+    if not len(messages.get("messages")):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=MessagesNotFoundError.message,
+        )
+
+    return messages

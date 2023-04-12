@@ -14,7 +14,7 @@ from app.domain.chat.room.repository.room_repository import RoomRepository
 class MessageQueryUseCase(ABC):
 
     @abstractmethod
-    def find_messages_by_room(self, room_id: int) -> List[Message]:
+    def find_messages_by_room(self, room_id: int) -> dict:
         raise NotImplementedError
 
 
