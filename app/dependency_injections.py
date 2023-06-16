@@ -6,6 +6,8 @@ from app.application.chat.message.message_command_usecase import MessageCommandU
 from app.application.chat.message.message_query_usecase import MessageQueryUseCase, MessageQueryUseCaseImpl
 from app.application.chat.room.room_command_usecase import RoomCommandUseCase, RoomCommandUseCaseImpl
 from app.application.chat.room.room_query_usecase import RoomQueryUseCase, RoomQueryUseCaseImpl
+from app.application.quiz.quiz_command_usecase import QuizCommandUseCase, QuizCommandUseCaseImpl
+from app.application.quiz.quiz_query_usecase import QuizQueryUseCase, QuizQueryUseCaseImpl
 from app.application.school.school_command_usecase import SchoolCommandUseCase, SchoolCommandUseCaseImpl
 from app.application.user.user_command_usecase import UserCommandUseCase, UserCommandUseCaseImpl
 from app.application.user.user_query_usecase import UserQueryUseCase, UserQueryUseCaseImpl
@@ -14,6 +16,7 @@ from app.domain.activity.repository.activity_repository import ActivityRepositor
 from app.domain.chat.message.repository.message_repository import MessageRepository
 from app.domain.chat.room.repository.room_participant_repository import RoomParticipantRepository
 from app.domain.chat.room.repository.room_repository import RoomRepository
+from app.domain.quiz.repository.quiz_repository import QuizRepository
 from app.domain.school.repository.school_repository import SchoolRepository
 from app.domain.services.hash import Hash
 from app.domain.services.manager_token import ManagerToken
@@ -38,6 +41,7 @@ from app.infrastructure.sqlite.chat.message.message_repository import MessageRep
 from app.infrastructure.sqlite.chat.room.room_participant_repository import RoomParticipantRepositoryImpl
 from app.infrastructure.sqlite.chat.room.room_repository import RoomRepositoryImpl
 from app.infrastructure.sqlite.database import create_tables, SessionLocal
+from app.infrastructure.sqlite.quiz.quiz_repository import QuizRepositoryImpl
 from app.infrastructure.sqlite.school.school_repository import SchoolRepositoryImpl
 from app.infrastructure.sqlite.user.user_repository import UserRepositoryImpl
 
@@ -82,6 +86,10 @@ def school_repository_dependency(session: Session = Depends(get_session)) -> Sch
 
 def activity_repository_dependency(session: Session = Depends(get_session)) -> ActivityRepository:
     return ActivityRepositoryImpl(session)
+
+
+def quiz_repository_dependency(session: Session = Depends(get_session)) -> QuizRepository:
+    return QuizRepositoryImpl(session)
 
 
 def activity_participant_repository_dependency(session: Session = Depends(get_session)) \
@@ -156,6 +164,25 @@ def activity_query_usecase(
         activity_repository=activity_repository,
         user_repository=user_repository,
         activity_participant_repository=activity_participant_repository
+    )
+
+def quiz_command_usecase(
+        quiz_repository: QuizRepository = Depends(quiz_repository_dependency),
+        user_repository: UserRepository = Depends(user_repository_dependency),
+) -> QuizCommandUseCase:
+    return QuizCommandUseCaseImpl(
+        quiz_repository=quiz_repository,
+        user_repository=user_repository
+    )
+
+
+def quiz_query_usecase(
+        quiz_repository: QuizRepository = Depends(quiz_repository_dependency),
+        user_repository: UserRepository = Depends(user_repository_dependency),
+) -> QuizQueryUseCase:
+    return QuizQueryUseCaseImpl(
+        quiz_repository=quiz_repository,
+        user_repository=user_repository
     )
 
 
