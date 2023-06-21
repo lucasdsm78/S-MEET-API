@@ -9,7 +9,6 @@ from app.domain.user.model.password import Password
 from app.domain.user.model.school import School
 from app.domain.user.model.user import User
 from app.infrastructure.sqlite.database import Base
-from app.infrastructure.sqlite.school.db_school import DBSchool
 
 
 def unixtimestamp() -> int:
@@ -29,6 +28,7 @@ class DBUser(Base):
     pseudo: Union[str, Column] = Column(String, nullable=False)
     last_name: Union[str, Column] = Column(String, nullable=False)
     school_id: Union[int, Column] = Column(Integer, ForeignKey('school.id'))
+    user_bio_id: Union[int, Column] = Column(Integer, ForeignKey('user_bio.id'))
     school = relationship("DBSchool", back_populates='user')
     activities = relationship("DBActivity", back_populates="user")
     quizs = relationship("DBQuiz", back_populates="user")
@@ -46,6 +46,7 @@ class DBUser(Base):
             first_name=self.first_name,
             pseudo=self.pseudo,
             last_name=self.last_name,
+            user_bio_id=self.user_bio_id,
             school=School(id=self.school_id, name=self.school.name) if self.school else None
         )
 
@@ -62,4 +63,5 @@ class DBUser(Base):
         user_db_to_update.first_name = user.first_name
         user_db_to_update.last_name = user.last_name
         user_db_to_update.pseudo = user.pseudo
+        user_db_to_update.user_bio_id = user.user_bio_id
         return user_db_to_update

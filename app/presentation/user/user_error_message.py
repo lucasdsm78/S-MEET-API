@@ -1,7 +1,8 @@
 from pydantic import BaseModel, Field
 
 from app.domain.chat.message.exception.message_exception import MessagesNotFoundError
-from app.domain.user.exception.user_exception import UserEmailAlreadyExistsError, UsersNotFoundError, UserNotFoundError
+from app.domain.user.exception.user_exception import UserEmailAlreadyExistsError, UsersNotFoundError, UserNotFoundError, \
+    UserBioNotFoundError
 
 
 class ErrorMessageUserEmailAlreadyExists(BaseModel):
@@ -14,6 +15,10 @@ class ErrorMessageUsersNotFound(BaseModel):
 
 class ErrorMessageUserNotFound(BaseModel):
     detail: str = Field(example=UserNotFoundError.message)
+
+
+class ErrorMessageUserBioNotFound(BaseModel):
+    detail: str = Field(example=UserBioNotFoundError.message)
 
 
 class ErrorMessagesRoomNotFound(BaseModel):

@@ -130,3 +130,5 @@ dmypy.json
 .idea/*
 db/sqlite.db
 .idea/workspace.xml
+
+.idea/

@@ -1,5 +1,3 @@
-from fastapi.security import HTTPBearer
-
 from app.application.activities.activity_command_usecase import ActivityCommandUseCase, ActivityCommandUseCaseImpl
 from app.application.activities.activity_query_usecase import ActivityQueryUseCase, ActivityQueryUseCaseImpl
 from app.application.chat.message.message_command_usecase import MessageCommandUseCase, MessageCommandUseCaseImpl
@@ -9,6 +7,8 @@ from app.application.chat.room.room_query_usecase import RoomQueryUseCase, RoomQ
 from app.application.quiz.quiz_command_usecase import QuizCommandUseCase, QuizCommandUseCaseImpl
 from app.application.quiz.quiz_query_usecase import QuizQueryUseCase, QuizQueryUseCaseImpl
 from app.application.school.school_command_usecase import SchoolCommandUseCase, SchoolCommandUseCaseImpl
+from app.application.user.bio.user_bio_command_usecase import UserBioCommandUseCase, UserBioCommandUseCaseImpl
+from app.application.user.bio.user_bio_query_usecase import UserBioQueryUseCase, UserBioQueryUseCaseImpl
 from app.application.user.user_command_usecase import UserCommandUseCase, UserCommandUseCaseImpl
 from app.application.user.user_query_usecase import UserQueryUseCase, UserQueryUseCaseImpl
 from app.domain.activity.repository.activity_participant_repository import ActivityParticipantRepository
@@ -21,6 +21,7 @@ from app.domain.school.repository.school_repository import SchoolRepository
 from app.domain.services.hash import Hash
 from app.domain.services.manager_token import ManagerToken
 from app.domain.services.socket_manager.socket_manager import SocketManager
+from app.domain.user.bio.repository.user_bio_repository import UserBioRepository
 from app.domain.user.repository.user_repository import UserRepository
 from app.infrastructure.config import Settings
 
@@ -43,6 +44,7 @@ from app.infrastructure.sqlite.chat.room.room_repository import RoomRepositoryIm
 from app.infrastructure.sqlite.database import create_tables, SessionLocal
 from app.infrastructure.sqlite.quiz.quiz_repository import QuizRepositoryImpl
 from app.infrastructure.sqlite.school.school_repository import SchoolRepositoryImpl
+from app.infrastructure.sqlite.user.bio.user_bio_repository import UserBioRepositoryImpl
 from app.infrastructure.sqlite.user.user_repository import UserRepositoryImpl
 
 # create database
@@ -80,6 +82,10 @@ def user_repository_dependency(session: Session = Depends(get_session)) -> UserR
     return UserRepositoryImpl(session)
 
 
+def user_bio_repository_dependency(session: Session = Depends(get_session)) -> UserBioRepositoryImpl:
+    return UserBioRepositoryImpl(session)
+
+
 def school_repository_dependency(session: Session = Depends(get_session)) -> SchoolRepository:
     return SchoolRepositoryImpl(session)
 
@@ -112,14 +118,26 @@ def room_participant_repository_dependency(session: Session = Depends(get_sessio
 def user_command_usecase(
         user_repository: UserRepository = Depends(user_repository_dependency),
         school_repository: SchoolRepository = Depends(school_repository_dependency),
+        user_bio_repository: UserBioRepository = Depends(user_bio_repository_dependency),
         hasher: Hash = Depends(hash_dependency),
         manager_token: ManagerToken = Depends(manager_token_dependency)
 ) -> UserCommandUseCase:
     return UserCommandUseCaseImpl(
         user_repository=user_repository,
         school_repository=school_repository,
+        user_bio_repository=user_bio_repository,
         hasher=hasher,
         manager_token=manager_token
+    )
+
+
+def user_bio_command_usecase(
+        user_repository: UserRepository = Depends(user_repository_dependency),
+        user_bio_repository: UserBioRepository = Depends(user_bio_repository_dependency)
+) -> UserBioCommandUseCase:
+    return UserBioCommandUseCaseImpl(
+        user_repository=user_repository,
+        user_bio_repository=user_bio_repository
     )
 
 
@@ -128,6 +146,14 @@ def user_query_usecase(
 ) -> UserQueryUseCase:
     return UserQueryUseCaseImpl(
         user_repository=user_repository
+    )
+
+
+def user_bio_query_usecase(
+        user_bio_repository: UserBioRepository = Depends(user_bio_repository_dependency)
+) -> UserBioQueryUseCase:
+    return UserBioQueryUseCaseImpl(
+        user_bio_repository=user_bio_repository
     )
 
 
@@ -165,6 +191,7 @@ def activity_query_usecase(
         user_repository=user_repository,
         activity_participant_repository=activity_participant_repository
     )
+
 
 def quiz_command_usecase(
         quiz_repository: QuizRepository = Depends(quiz_repository_dependency),
