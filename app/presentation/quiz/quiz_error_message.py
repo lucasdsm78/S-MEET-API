@@ -7,5 +7,9 @@ class ErrorMessageQuizsNotFound(BaseModel):
     detail: str = Field(example=QuizsNotFoundError.message)
 
 
+class ErrorMessageQuestionsNotFound(BaseModel):
+    detail: str = Field(example=QuizsNotFoundError.message)
+
+
 class ErrorMessageQuizNotFound(BaseModel):
     detail: str = Field(example=QuizNotFoundError.message)
