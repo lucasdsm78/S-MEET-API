@@ -21,6 +21,10 @@ class ActivityQueryUseCase(ABC):
     def get_activity_by_id(self, activity_id: int, email: str) -> Optional[ActivityReadModel]:
         raise NotImplementedError
 
+    @abstractmethod
+    def check_is_participate(self, activity_id: int, user_id: int) -> bool:
+        raise NotImplementedError
+
 
 class ActivityQueryUseCaseImpl(ActivityQueryUseCase, BaseModel):
     activity_repository: ActivityRepository
@@ -62,5 +66,13 @@ class ActivityQueryUseCaseImpl(ActivityQueryUseCase, BaseModel):
             if is_participate is False:
                 return False
             return True
+        except:
+            raise
+
+    def check_is_participate(self, activity_id: int, user_id: int) -> bool:
+        try:
+            user = self.user_repository.find_by_id(user_id)
+            activity = self.activity_repository.find_by_id(activity_id)
+            return self.activity_participant_repository.find_participation(activity.id, user.id)
         except:
             raise

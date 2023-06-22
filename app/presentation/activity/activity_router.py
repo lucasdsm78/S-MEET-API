@@ -136,7 +136,7 @@ async def participate_activity(
 @router.delete(
     "/activity/{id}/participation/cancel",
     status_code=status.HTTP_202_ACCEPTED,
-        summary="Cancel a participation to an activity",
+    summary="Cancel a participation to an activity",
     response_model=ActivityCancelParticipationResponse,
     responses={
         status.HTTP_404_NOT_FOUND: {
@@ -166,3 +166,44 @@ async def cancel_participation_activity(
         )
 
     return cancel_participation_activity
+
+
+@router.get(
+    "/activity/{id}/check_participation",
+    status_code=status.HTTP_200_OK,
+    summary="Check a participation to an activity",
+    response_model=bool,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorMessageActivityNotFound,
+        },
+    },
+)
+async def check_participation_activity(
+        activity_id: int,
+        activity_query_usecase: ActivityQueryUseCase = Depends(activity_query_usecase),
+        current_user: dict = Depends(current_user),
+):
+    try:
+        check_participation = activity_query_usecase.check_is_participate(
+            activity_id,
+            current_user.get('id', '')
+        )
+    except UserNotFoundError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=e.message,
+        )
+
+    except ActivityNotFoundError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=e.message,
+        )
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+    return check_participation
