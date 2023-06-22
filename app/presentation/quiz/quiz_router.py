@@ -1,7 +1,8 @@
 from typing import Union
 
-from fastapi import APIRouter, Depends, HTTPException, status, Query
-from app.application.quiz.quiz_command_model import QuizCreateResponse, QuizCreateModel
+from fastapi import APIRouter, Depends, HTTPException, status, Query, Body
+from app.application.quiz.quiz_command_model import QuizCreateResponse, QuizCreateModel, ScoreAddedResponse, \
+    ScoreCreateModel
 from app.application.quiz.quiz_command_usecase import QuizCommandUseCase
 from app.application.quiz.quiz_query_usecase import QuizQueryUseCase
 from app.dependency_injections import current_user, quiz_command_usecase, quiz_query_usecase
@@ -90,3 +91,24 @@ async def get_quizs(
         )
 
     return quizs
+
+
+@router.post(
+    "/quiz/{quiz_id}/score/add",
+    response_model=ScoreAddedResponse,
+    summary="Add a score to a quiz",
+    status_code=status.HTTP_200_OK,
+)
+async def add_score(
+        quiz_id: int,
+        data: ScoreCreateModel,
+        quiz_command_usecase: QuizCommandUseCase = Depends(quiz_command_usecase),
+        current_user: dict = Depends(current_user)
+):
+    try:
+        score = quiz_command_usecase.add_score(current_user.get('id', ''), quiz_id, data)
+
+    except Exception as e:
+        raise
+
+    return score
