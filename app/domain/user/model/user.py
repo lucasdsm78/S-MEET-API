@@ -19,7 +19,8 @@ class User:
             password: Password,
             id: Optional[int] = None,
             created_at: Optional[int] = None,
-            updated_at: Optional[int] = None
+            updated_at: Optional[int] = None,
+            user_bio_id: Optional[int] = None
     ):
         self.id: Optional[int] = id
         self.password: Password = password
@@ -30,6 +31,7 @@ class User:
         self.first_name: str = first_name
         self.last_name: str = last_name
         self.updated_at: Optional[int] = updated_at
+        self.user_bio_id: Optional[int] = user_bio_id
 
     def token_details(self) -> dict:
         return dict(

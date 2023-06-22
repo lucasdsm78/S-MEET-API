@@ -13,6 +13,7 @@ class UserReadModel(BaseModel):
     pseudo: str = Field(example="lucasdsm")
     createdAt: int = Field(example=1136214245000)
     updatedAt: int = Field(example=1136214245000)
+    user_bio_id: int = Field(example=0)
 
     class Config:
         arbitrary_types_allowed = True
@@ -27,6 +28,7 @@ class UserReadModel(BaseModel):
             first_name=user.first_name,
             last_name=user.last_name,
             pseudo=user.pseudo,
+            user_bio_id=user.user_bio_id
         )
 
 
