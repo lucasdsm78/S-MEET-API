@@ -2,10 +2,12 @@ from abc import ABC, abstractmethod
 
 from app.application.activities.activity_command_model import ActivityCreateModel, ActivityCreateResponse, \
     ActivityParticipateResponse, ActivityCancelParticipationResponse
-from app.application.quiz.quiz_command_model import QuizCreateModel, QuizCreateResponse
+from app.application.quiz.quiz_command_model import QuizCreateModel, QuizCreateResponse, ScoreAddedResponse, \
+    ScoreCreateModel
 from app.domain.activity.model.category import Category
 from app.domain.activity.model.type import Type
 from app.domain.quiz.model.properties.question import Question
+from app.domain.quiz.model.properties.score import Score
 from app.domain.quiz.model.quiz import Quiz
 from app.domain.quiz.repository.quiz_repository import QuizRepository
 from app.domain.user.model.user_summary import UserSummary
@@ -18,6 +20,10 @@ class QuizCommandUseCase(ABC):
 
     @abstractmethod
     def create(self, email: str, quiz_create_model: QuizCreateModel):
+        raise NotImplementedError
+
+    @abstractmethod
+    def add_score(self, user_id: int, id_quiz: int, score: ScoreCreateModel) -> ScoreAddedResponse:
         raise NotImplementedError
 
 
@@ -69,3 +75,25 @@ class QuizCommandUseCaseImpl(QuizCommandUseCase):
             raise
 
         return QuizCreateResponse()
+
+    def add_score(self, user_id: int, id_quiz: int, data: ScoreCreateModel) -> ScoreAddedResponse:
+        try:
+            # Récupération de l'utilisateur connecté
+            user = self.user_repository.find_by_id(user_id)
+
+            # Récupération du quiz s'il existe
+            quiz = self.quiz_repository.find_by_id(id_quiz)
+
+            score = Score(
+                quiz_id=quiz.id,
+                score=data.score,
+                user=UserSummary(id=user.id, email=user.email),
+            )
+
+            self.quiz_repository.add_score(score)
+            self.quiz_repository.commit()
+        except:
+            self.quiz_repository.rollback()
+            raise
+
+        return ScoreAddedResponse()

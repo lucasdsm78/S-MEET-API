@@ -26,6 +26,7 @@ class DBQuiz(Base):
     user_id: Union[int, Column] = Column(Integer, ForeignKey('user.id'))
     user = relationship("DBUser", back_populates='quizs')
     questions = relationship("DBQuestion", back_populates='quiz')
+    scores = relationship("DBScore", back_populates='quiz')
     date: Union[int, Column] = Column(Integer, index=True, nullable=False)
     updated_at: Union[int, Column] = Column(Integer, index=True, nullable=False)
 

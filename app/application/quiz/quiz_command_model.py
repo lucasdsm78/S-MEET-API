@@ -25,5 +25,15 @@ class QuizCreateModel(BaseModel):
     questions: List[QuestionCreateModel]
 
 
+class ScoreCreateModel(BaseModel):
+    """ScoreCreateModel represents a write model to create a score."""
+
+    score: int
+
+
 class QuizCreateResponse(BaseModel):
     message: str = "The quiz is well created"
+
+
+class ScoreAddedResponse(BaseModel):
+    message: str = "The score is well added for this quiz and this user"
