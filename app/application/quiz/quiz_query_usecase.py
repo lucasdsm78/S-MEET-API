@@ -4,7 +4,7 @@ from typing import Optional
 from pydantic import BaseModel
 
 from app.application.quiz.quiz_query_model import QuizReadModel, QuestionReadModel
-from app.domain.quiz.exception.quiz_exception import ScoreNotFoundError
+from app.domain.quiz.exception.quiz_exception import ScoreNotFoundError, QuizNotFoundError
 from app.domain.quiz.repository.quiz_repository import QuizRepository
 from app.domain.user.repository.user_repository import UserRepository
 
@@ -20,6 +20,10 @@ class QuizQueryUseCase(ABC):
 
     @abstractmethod
     def fetch_score(self, quiz_id: int, user_id: int) -> int:
+        raise NotImplementedError
+
+    @abstractmethod
+    def fetch_quiz_by_id(self, quiz_id: int) -> Optional[QuizReadModel]:
         raise NotImplementedError
 
 
@@ -72,3 +76,13 @@ class QuizQueryUseCaseImpl(QuizQueryUseCase, BaseModel):
             return True
         except:
             raise
+
+    def fetch_quiz_by_id(self, quiz_id: int) -> Optional[QuizReadModel]:
+        try:
+            quiz = self.quiz_repository.find_by_id(quiz_id)
+            if quiz is None:
+                raise QuizNotFoundError
+        except:
+            raise
+
+        return QuizReadModel.from_entity_get_all(quiz)
