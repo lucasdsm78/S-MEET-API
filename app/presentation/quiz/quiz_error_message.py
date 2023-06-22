@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 
-from app.domain.quiz.exception.quiz_exception import QuizsNotFoundError, QuizNotFoundError
+from app.domain.quiz.exception.quiz_exception import QuizsNotFoundError, QuizNotFoundError, ScoreNotFoundError
 
 
 class ErrorMessageQuizsNotFound(BaseModel):
@@ -13,3 +13,7 @@ class ErrorMessageQuestionsNotFound(BaseModel):
 
 class ErrorMessageQuizNotFound(BaseModel):
     detail: str = Field(example=QuizNotFoundError.message)
+
+
+class ErrorMessageScoreNotFound(BaseModel):
+    detail: str = Field(example=ScoreNotFoundError.message)
