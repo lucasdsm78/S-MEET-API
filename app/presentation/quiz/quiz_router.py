@@ -96,6 +96,35 @@ async def get_quizs(
     return quizs
 
 
+@router.get(
+    "/quizs/{user_id}",
+    response_model=dict,
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorMessageQuizsNotFound,
+        }
+    }
+)
+async def get_quizs_by_user_id(
+        user_id: int,
+        quiz_query_usecase: QuizQueryUseCase = Depends(quiz_query_usecase),
+):
+    try:
+        quizs = quiz_query_usecase.fetch_quizs_by_user_id(user_id)
+
+    except Exception as e:
+        raise
+
+    if not len(quizs.get("quizs")):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=QuizsNotFoundError.message,
+        )
+
+    return quizs
+
+
 @router.post(
     "/quiz/{quiz_id}/score/add",
     response_model=ScoreAddedResponse,
