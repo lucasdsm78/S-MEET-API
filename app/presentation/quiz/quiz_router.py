@@ -4,12 +4,13 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query, Body
 from app.application.quiz.quiz_command_model import QuizCreateResponse, QuizCreateModel, ScoreAddedResponse, \
     ScoreCreateModel
 from app.application.quiz.quiz_command_usecase import QuizCommandUseCase
+from app.application.quiz.quiz_query_model import QuizReadModel
 from app.application.quiz.quiz_query_usecase import QuizQueryUseCase
 from app.dependency_injections import current_user, quiz_command_usecase, quiz_query_usecase
 from app.domain.quiz.exception.quiz_exception import QuizsNotFoundError, ScoreNotFoundError, QuizNotFoundError
 from app.domain.user.exception.user_exception import UserNotFoundError
 from app.presentation.quiz.quiz_error_message import ErrorMessageQuizsNotFound, ErrorMessageQuestionsNotFound, \
-    ErrorMessageScoreNotFound
+    ErrorMessageScoreNotFound, ErrorMessageQuizNotFound
 
 router = APIRouter(
     tags=['quiz']
@@ -95,6 +96,35 @@ async def get_quizs(
     return quizs
 
 
+@router.get(
+    "/quizs/{user_id}",
+    response_model=dict,
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorMessageQuizsNotFound,
+        }
+    }
+)
+async def get_quizs_by_user_id(
+        user_id: int,
+        quiz_query_usecase: QuizQueryUseCase = Depends(quiz_query_usecase),
+):
+    try:
+        quizs = quiz_query_usecase.fetch_quizs_by_user_id(user_id)
+
+    except Exception as e:
+        raise
+
+    if not len(quizs.get("quizs")):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=QuizsNotFoundError.message,
+        )
+
+    return quizs
+
+
 @router.post(
     "/quiz/{quiz_id}/score/add",
     response_model=ScoreAddedResponse,
@@ -152,3 +182,32 @@ async def get_score(
         )
 
     return score
+
+
+@router.get(
+    "/quiz/{quiz_id}",
+    response_model=QuizReadModel,
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorMessageQuizNotFound,
+        },
+    },
+)
+async def get_quiz_by_id(
+        quiz_id: int,
+        quiz_query_usecase: QuizQueryUseCase = Depends(quiz_query_usecase),
+):
+    try:
+        quiz = quiz_query_usecase.fetch_quiz_by_id(quiz_id)
+    except QuizNotFoundError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=e.message,
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+    return quiz
