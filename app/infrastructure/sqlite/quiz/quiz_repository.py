@@ -1,12 +1,16 @@
 from typing import List, Optional
 
+from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm.session import Session
 
+from app.domain.quiz.exception.quiz_exception import QuizNotFoundError
 from app.domain.quiz.model.properties.question import Question
+from app.domain.quiz.model.properties.score import Score
 from app.domain.quiz.model.quiz import Quiz
 from app.domain.quiz.repository.quiz_repository import QuizRepository
 from app.infrastructure.sqlite.quiz.db_question import DBQuestion
 from app.infrastructure.sqlite.quiz.db_quiz import DBQuiz
+from app.infrastructure.sqlite.quiz.db_score import DBScore
 from app.infrastructure.sqlite.user.db_user import DBUser
 
 
@@ -32,6 +36,13 @@ class QuizRepositoryImpl(QuizRepository):
             db_question.quiz_id = db_quiz.id
 
         return quiz
+
+    def add_score(self, score: Score):
+        score_db = DBScore.from_entity(score)
+        try:
+            self.session.add(score_db)
+        except:
+            raise
 
     def find_quizs(self, id: int) -> List[Quiz]:
         try:
@@ -65,6 +76,16 @@ class QuizRepositoryImpl(QuizRepository):
             return []
 
         return list(map(lambda question_db: question_db.to_entity(), questions_dbs))
+
+    def find_by_id(self, quiz_id: int) -> Optional[Quiz]:
+        try:
+            quiz_db = self.session.query(DBQuiz).filter_by(id=quiz_id).one()
+        except NoResultFound:
+            raise QuizNotFoundError
+        except Exception:
+            raise
+
+        return quiz_db.to_entity()
 
     def begin(self):
         self.session.begin()
