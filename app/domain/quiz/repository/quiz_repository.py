@@ -31,6 +31,14 @@ class QuizRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def get_score(self, quiz_id: int, user_id: int) -> int:
+        raise NotImplementedError
+
+    @abstractmethod
+    def is_played(self, quiz_id: int, user_id: int) -> bool:
+        raise NotImplementedError
+
+    @abstractmethod
     def commit(self):
         raise NotImplementedError
 

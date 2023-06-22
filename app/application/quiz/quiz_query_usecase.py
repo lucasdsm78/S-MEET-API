@@ -4,6 +4,7 @@ from typing import Optional
 from pydantic import BaseModel
 
 from app.application.quiz.quiz_query_model import QuizReadModel, QuestionReadModel
+from app.domain.quiz.exception.quiz_exception import ScoreNotFoundError
 from app.domain.quiz.repository.quiz_repository import QuizRepository
 from app.domain.user.repository.user_repository import UserRepository
 
@@ -15,6 +16,10 @@ class QuizQueryUseCase(ABC):
         raise NotImplementedError
 
     def fetch_questions_by_quiz_id(self, quiz_id: int) -> dict:
+        raise NotImplementedError
+
+    @abstractmethod
+    def fetch_score(self, quiz_id: int, user_id: int) -> int:
         raise NotImplementedError
 
 
@@ -36,6 +41,16 @@ class QuizQueryUseCaseImpl(QuizQueryUseCase, BaseModel):
         except Exception as e:
             raise
 
+    def fetch_score(self, quiz_id: int, user_id: int) -> int:
+        try:
+            is_played = self.is_played(quiz_id, user_id)
+            if is_played is False:
+                raise ScoreNotFoundError
+            return self.quiz_repository.get_score(quiz_id, user_id)
+
+        except Exception as e:
+            raise
+
     def fetch_questions_by_quiz_id(self, quiz_id: int) -> dict:
         try:
             questions = self.quiz_repository.find_questions_by_quiz_id(quiz_id)
@@ -45,4 +60,15 @@ class QuizQueryUseCaseImpl(QuizQueryUseCase, BaseModel):
             )
 
         except Exception as e:
+            raise
+
+    def is_played(self, quiz_id: int, user_id: int) -> bool:
+        try:
+            user = self.user_repository.find_by_id(user_id)
+            quiz = self.quiz_repository.find_by_id(quiz_id)
+            is_played = self.quiz_repository.is_played(quiz.id, user.id)
+            if is_played is False:
+                return False
+            return True
+        except:
             raise

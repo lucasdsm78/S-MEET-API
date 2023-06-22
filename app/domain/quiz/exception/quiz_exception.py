@@ -17,3 +17,10 @@ class QuizNotFoundError(Exception):
 
     def __str__(self):
         return QuizNotFoundError.message
+
+
+class ScoreNotFoundError(Exception):
+    message = "The score for this quiz and this user does not exist."
+
+    def __str__(self):
+        return ScoreNotFoundError.message
