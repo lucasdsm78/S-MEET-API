@@ -3,7 +3,7 @@ from typing import List, Optional
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm.session import Session
 
-from app.domain.quiz.exception.quiz_exception import QuizNotFoundError
+from app.domain.quiz.exception.quiz_exception import QuizNotFoundError, ScoreNotFoundError
 from app.domain.quiz.model.properties.question import Question
 from app.domain.quiz.model.properties.score import Score
 from app.domain.quiz.model.quiz import Quiz
@@ -86,6 +86,31 @@ class QuizRepositoryImpl(QuizRepository):
             raise
 
         return quiz_db.to_entity()
+
+    def get_score(self, quiz_id: int, user_id: int) -> int:
+        try:
+            score_db = self.session.query(DBScore).filter_by(quiz_id=quiz_id, user_id=user_id).one()
+        except NoResultFound:
+            raise ScoreNotFoundError
+        except Exception:
+            raise
+
+        return score_db.score
+
+    def is_played(self, quiz_id: int, user_id: int) -> bool:
+        try:
+            result = False
+            score_db = self.session.query(DBScore).filter_by(
+                quiz_id=quiz_id,
+                user_id=user_id
+            ).count()
+
+            if score_db != 0:
+                result = True
+        except Exception:
+            raise
+
+        return result
 
     def begin(self):
         self.session.begin()

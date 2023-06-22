@@ -6,8 +6,10 @@ from app.application.quiz.quiz_command_model import QuizCreateResponse, QuizCrea
 from app.application.quiz.quiz_command_usecase import QuizCommandUseCase
 from app.application.quiz.quiz_query_usecase import QuizQueryUseCase
 from app.dependency_injections import current_user, quiz_command_usecase, quiz_query_usecase
-from app.domain.quiz.exception.quiz_exception import QuizsNotFoundError
-from app.presentation.quiz.quiz_error_message import ErrorMessageQuizsNotFound, ErrorMessageQuestionsNotFound
+from app.domain.quiz.exception.quiz_exception import QuizsNotFoundError, ScoreNotFoundError, QuizNotFoundError
+from app.domain.user.exception.user_exception import UserNotFoundError
+from app.presentation.quiz.quiz_error_message import ErrorMessageQuizsNotFound, ErrorMessageQuestionsNotFound, \
+    ErrorMessageScoreNotFound
 
 router = APIRouter(
     tags=['quiz']
@@ -110,5 +112,43 @@ async def add_score(
 
     except Exception as e:
         raise
+
+    return score
+
+
+@router.get(
+    "/quiz/{quiz_id}/score",
+    response_model=int,
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorMessageScoreNotFound,
+        },
+    },
+)
+async def get_score(
+        quiz_id: int,
+        quiz_query_usecase: QuizQueryUseCase = Depends(quiz_query_usecase),
+        current_user: dict = Depends(current_user),
+):
+    try:
+        score = quiz_query_usecase.fetch_score(quiz_id, current_user.get('id', ''))
+    except ScoreNotFoundError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=e.message,
+        )
+
+    except UserNotFoundError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=e.message,
+        )
+
+    except QuizNotFoundError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=e.message,
+        )
 
     return score
