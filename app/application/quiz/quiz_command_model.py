@@ -1,4 +1,8 @@
+from typing import List
+
 from pydantic import BaseModel, Field
+
+from app.domain.quiz.model.properties.question import Question
 
 
 class QuizCreateModel(BaseModel):
@@ -7,6 +11,7 @@ class QuizCreateModel(BaseModel):
     name: str = Field(example="Quiz personnalité")
     nbr_questions: int
     image: str
+    questions: List[Question]
 
 
 class QuizCreateResponse(BaseModel):

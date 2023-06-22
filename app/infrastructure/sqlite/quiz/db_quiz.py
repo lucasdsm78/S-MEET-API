@@ -8,6 +8,7 @@ from app.domain.quiz.model.quiz import Quiz
 from app.domain.user.model.email import Email
 from app.domain.user.model.user_summary import UserSummary
 from app.infrastructure.sqlite.database import Base
+from app.infrastructure.sqlite.quiz.db_question import DBQuestion
 
 
 def unixtimestamp() -> int:
@@ -24,6 +25,7 @@ class DBQuiz(Base):
     image: Union[str, Column] = Column(String, nullable=False)
     user_id: Union[int, Column] = Column(Integer, ForeignKey('user.id'))
     user = relationship("DBUser", back_populates='quizs')
+    questions = relationship(DBQuestion.__str__(), back_populates='quiz')
     date: Union[int, Column] = Column(Integer, index=True, nullable=False)
     updated_at: Union[int, Column] = Column(Integer, index=True, nullable=False)
 
@@ -35,6 +37,7 @@ class DBQuiz(Base):
             image=self.image,
             user=UserSummary(id=self.user_id, email=Email(self.user.email)),
             date=self.date,
+            questions=self.questions,
             updated_at=self.updated_at,
         )
 
@@ -47,6 +50,7 @@ class DBQuiz(Base):
         quiz_db_to_update.nbr_questions = quiz.nbr_questions
         quiz_db_to_update.image = quiz.image
         quiz_db_to_update.user_id = quiz.user.id
+        quiz_db_to_update.questions = quiz.questions
         quiz_db_to_update.date = now
         quiz_db_to_update.updated_at = now
         return quiz_db_to_update

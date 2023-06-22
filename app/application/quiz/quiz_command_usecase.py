@@ -41,6 +41,7 @@ class QuizCommandUseCaseImpl(QuizCommandUseCase):
                 nbr_questions=data.nbr_questions,
                 image=data.image,
                 user=UserSummary(id=user.id, email=user.email),
+                questions=data.questions
             )
 
             # Enregistrement dans la base de données
