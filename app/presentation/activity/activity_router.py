@@ -1,6 +1,7 @@
-from typing import Union
+from typing import Union, Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
+from fastapi.responses import FileResponse
 from fastapi.params import Path
 
 from app.application.activities.activity_command_model import ActivityCreateResponse, ActivityCreateModel, \
@@ -22,7 +23,7 @@ router = APIRouter(
 
 @router.post(
     "/activity/create",
-    response_model=ActivityCreateResponse,
+    response_model=str,
     summary="Create an activity",
     status_code=status.HTTP_200_OK,
 )
@@ -38,6 +39,65 @@ async def create_activity(
         raise
 
     return activity
+
+@router.post(
+    "/activity/image/upload",
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorMessageActivityNotFound,
+        }
+    }
+)
+async def upload_image_activity(
+        activity_uuid: str,
+        image: UploadFile = File(...),
+        activity_command_usecase: ActivityCommandUseCase = Depends(activity_command_usecase),
+        current_user: dict = Depends(current_user)
+):
+    try:
+        image_filename = activity_command_usecase.save_image_file(image, activity_uuid)
+
+    except ActivityNotFoundError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=e.message,
+        )
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+    return image_filename
+
+@router.get(
+    "/activity/image/{activity_id}",
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorMessageActivityNotFound,
+        }
+    }
+)
+async def get_image(
+        activity_id: int,
+        activity_query_usecase: ActivityQueryUseCase = Depends(activity_query_usecase),
+        current_user: dict = Depends(current_user)
+):
+    try:
+        return activity_query_usecase.get_image_activity(activity_id)
+
+    except ActivityNotFoundError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=e.message,
+        )
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
 
 
 @router.get(

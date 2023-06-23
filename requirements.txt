@@ -10,3 +10,4 @@ pytest
 jinja2
 python-dotenv
 websockets
+shortuuid

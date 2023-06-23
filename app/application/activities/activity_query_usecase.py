@@ -3,6 +3,8 @@ from typing import Optional
 
 from pydantic import BaseModel
 
+from fastapi.responses import FileResponse
+
 from app.application.activities.activity_query_model import ActivityReadModel
 from app.domain.activity.exception.activity_exception import ActivityNotFoundError
 from app.domain.activity.model.activity import Activity
@@ -23,6 +25,10 @@ class ActivityQueryUseCase(ABC):
 
     @abstractmethod
     def check_is_participate(self, activity_id: int, user_id: int) -> bool:
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_image_activity(self, activity_id: int) -> FileResponse:
         raise NotImplementedError
 
 
@@ -76,3 +82,10 @@ class ActivityQueryUseCaseImpl(ActivityQueryUseCase, BaseModel):
             return self.activity_participant_repository.find_participation(activity.id, user.id)
         except:
             raise
+
+    def get_image_activity(self, activity_id: int) -> FileResponse:
+        activity = self.activity_repository.find_by_id(activity_id)
+        if not activity:
+            raise ActivityNotFoundError
+
+        return FileResponse(activity.image_activity)

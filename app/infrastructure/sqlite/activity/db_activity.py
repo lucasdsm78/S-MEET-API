@@ -23,6 +23,7 @@ class DBActivity(Base):
     __tablename__ = "activity"
     id: Union[int, Column] = Column(Integer, primary_key=True, autoincrement=True)
     type: Union[str, Column] = Column(String, nullable=False)
+    uuid: Union[str, Column] = Column(String, nullable=False, unique=True)
     name: Union[str, Column] = Column(String, nullable=False)
     category: Union[str, Column] = Column(String, nullable=False)
     description: Union[str, Column] = Column(String, nullable=False)
@@ -42,6 +43,7 @@ class DBActivity(Base):
     def to_entity(self) -> Activity:
         return Activity(
             id=self.id,
+            uuid=self.uuid,
             type=Type.from_str(self.type),
             category=Category.from_str(self.category),
             name=self.name,
@@ -62,6 +64,7 @@ class DBActivity(Base):
         now = unixtimestamp()
         activity_db_to_update = db_activity if db_activity is not None else DBActivity()
         activity_db_to_update.id = activity.id
+        activity_db_to_update.uuid = activity.uuid
         activity_db_to_update.type = activity.type.value
         activity_db_to_update.category = activity.category.value
         activity_db_to_update.name = activity.name

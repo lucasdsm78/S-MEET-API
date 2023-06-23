@@ -46,6 +46,15 @@ class ActivityRepositoryImpl(ActivityRepository):
             raise
         return activity_db.to_entity()
 
+    def find_by_uuid(self, activity_uuid: str) -> Optional[Activity]:
+        try:
+            activity_db = self.session.query(DBActivity).filter_by(uuid=activity_uuid).one()
+        except NoResultFound:
+            raise ActivityNotFoundError
+        except Exception as e:
+            raise
+        return activity_db.to_entity()
+
     def begin(self):
         self.session.begin()
 

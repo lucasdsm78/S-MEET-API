@@ -20,6 +20,10 @@ class ActivityRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def find_by_uuid(self, activity_uuid: str) -> Optional[Activity]:
+        raise NotImplementedError
+
+    @abstractmethod
     def commit(self):
         raise NotImplementedError
 
