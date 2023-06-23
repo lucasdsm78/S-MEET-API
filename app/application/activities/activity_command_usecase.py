@@ -64,9 +64,11 @@ class ActivityCommandUseCaseImpl(ActivityCommandUseCase):
             # Envoi d'une requête pour savoir si l'école existe bien
             school = self.school_repository.find_by_id(data.school_id)
 
+            uuid = shortuuid.uuid()
+
             activity = Activity(
                 type=Type.from_str(data.type),
-                uuid=shortuuid.uuid(),
+                uuid=uuid,
                 category=Category.from_str(data.category),
                 name=data.name,
                 school=school.id,
@@ -74,7 +76,7 @@ class ActivityCommandUseCaseImpl(ActivityCommandUseCase):
                 start_date=data.start_date,
                 end_date=data.end_date,
                 place=data.place,
-                image_activity=data.image_activity,
+                image_activity=f"images/activity/{uuid}/{data.image_activity}",
                 max_members=data.max_members,
                 user=UserSummary(id=user.id, email=user.email),
             )
@@ -93,9 +95,9 @@ class ActivityCommandUseCaseImpl(ActivityCommandUseCase):
         if not activity:
             raise ActivityNotFoundError
 
-        save_path = os.path.join(f"images/activity/{activity.id}", image.filename)
+        save_path = os.path.join(f"images/activity/{activity.uuid}", image.filename)
 
-        os.makedirs(f"images/activity/{activity.id}", exist_ok=True)
+        os.makedirs(f"images/activity/{activity.uuid}", exist_ok=True)
 
         with open(save_path, "wb") as f:
             shutil.copyfileobj(image.file, f)

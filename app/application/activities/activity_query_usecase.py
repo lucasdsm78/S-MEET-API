@@ -88,5 +88,4 @@ class ActivityQueryUseCaseImpl(ActivityQueryUseCase, BaseModel):
         if not activity:
             raise ActivityNotFoundError
 
-        image_path = f"images/activity/{activity.id}/{activity.image_activity}"
-        return FileResponse(image_path)
+        return FileResponse(activity.image_activity)

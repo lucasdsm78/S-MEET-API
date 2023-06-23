@@ -41,7 +41,7 @@ async def create_activity(
     return activity
 
 @router.post(
-    "/upload_image_activity",
+    "/activity/image/upload",
     status_code=status.HTTP_200_OK,
     responses={
         status.HTTP_404_NOT_FOUND: {
@@ -72,7 +72,7 @@ async def upload_image_activity(
     return image_filename
 
 @router.get(
-    "/image/{activity_id}",
+    "/activity/image/{activity_id}",
     status_code=status.HTTP_200_OK,
     responses={
         status.HTTP_404_NOT_FOUND: {
