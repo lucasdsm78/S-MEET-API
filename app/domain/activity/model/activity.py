@@ -13,6 +13,7 @@ class Activity:
     def __init__(
             self,
             type: Type,
+            uuid: str,
             name: str,
             school: int,
             description: str,
@@ -29,6 +30,7 @@ class Activity:
     ):
         self.id: Optional[int] = id
         self.type: Type = type
+        self.uuid: str = uuid
         self.category: Category = category
         self.name: str = name
         self.description: str = description

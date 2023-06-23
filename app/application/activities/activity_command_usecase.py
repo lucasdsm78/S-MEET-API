@@ -1,7 +1,14 @@
+import os
+import shutil
+import shortuuid
 from abc import ABC, abstractmethod
+from datetime import datetime
+
+from fastapi import UploadFile
 
 from app.application.activities.activity_command_model import ActivityCreateModel, ActivityCreateResponse, \
     ActivityParticipateResponse, ActivityCancelParticipationResponse
+from app.domain.activity.exception.activity_exception import ActivityNotFoundError
 from app.domain.activity.model.activity import Activity
 from app.domain.activity.model.activity_participants import ActivityParticipant
 from app.domain.activity.model.category import Category
@@ -9,7 +16,6 @@ from app.domain.activity.model.type import Type
 from app.domain.activity.repository.activity_participant_repository import ActivityParticipantRepository
 from app.domain.activity.repository.activity_repository import ActivityRepository
 from app.domain.school.repository.school_repository import SchoolRepository
-from app.domain.user.model.school import School
 from app.domain.user.model.user_summary import UserSummary
 
 from app.domain.user.repository.user_repository import UserRepository
@@ -19,14 +25,19 @@ class ActivityCommandUseCase(ABC):
     """ActivityCommandUseCase defines a command usecase inteface related Activity entity."""
 
     @abstractmethod
-    def create(self, email: str, activity_create_model: ActivityCreateModel):
+    def create(self, email: str, activity_create_model: ActivityCreateModel) -> str:
         raise NotImplementedError
 
     @abstractmethod
     def add_participant(self, activity_id: int, email: str) -> ActivityParticipateResponse:
         raise NotImplementedError
 
+    @abstractmethod
     def delete_participant(self, activity_id: int, email: str) -> ActivityCancelParticipationResponse:
+        raise NotImplementedError
+
+    @abstractmethod
+    def save_image_file(self, image: UploadFile, activity_uuid: str) -> str:
         raise NotImplementedError
 
 
@@ -45,7 +56,7 @@ class ActivityCommandUseCaseImpl(ActivityCommandUseCase):
         self.school_repository: SchoolRepository = school_repository
         self.activity_participant_repository: ActivityParticipantRepository = activity_participant_repository
 
-    def create(self, email: str, data: ActivityCreateModel) -> ActivityCreateResponse:
+    def create(self, email: str, data: ActivityCreateModel) -> str:
         try:
             # Récupération de l'utilisateur connecté
             user = self.user_repository.find_by_email(email)
@@ -55,6 +66,7 @@ class ActivityCommandUseCaseImpl(ActivityCommandUseCase):
 
             activity = Activity(
                 type=Type.from_str(data.type),
+                uuid=shortuuid.uuid(),
                 category=Category.from_str(data.category),
                 name=data.name,
                 school=school.id,
@@ -74,7 +86,21 @@ class ActivityCommandUseCaseImpl(ActivityCommandUseCase):
             self.activity_repository.rollback()
             raise
 
-        return ActivityCreateResponse()
+        return activity.uuid
+
+    def save_image_file(self, image: UploadFile, activity_uuid: str) -> str:
+        activity = self.activity_repository.find_by_uuid(activity_uuid)
+        if not activity:
+            raise ActivityNotFoundError
+
+        save_path = os.path.join(f"images/activity/{activity.id}", image.filename)
+
+        os.makedirs(f"images/activity/{activity.id}", exist_ok=True)
+
+        with open(save_path, "wb") as f:
+            shutil.copyfileobj(image.file, f)
+
+        return save_path
 
     def add_participant(self, activity_id: int, email: str) -> ActivityParticipateResponse:
         try:

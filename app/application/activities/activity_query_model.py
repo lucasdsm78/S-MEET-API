@@ -11,6 +11,7 @@ class ActivityReadModel(BaseModel):
 
     id: int
     type: str
+    uuid: str
     school: int
     category: str
     name: str = Field(example="Sortie à la ptinoire")
@@ -32,6 +33,7 @@ class ActivityReadModel(BaseModel):
     def from_entity_get_all(activity: Activity) -> "ActivityReadModel":
         return ActivityReadModel(
             id=activity.id,
+            uuid=activity.uuid,
             type=activity.type.value,
             category=activity.category.value,
             name=activity.name,
@@ -51,6 +53,7 @@ class ActivityReadModel(BaseModel):
     def from_entity_get_by_id(activity: Activity, is_participate: bool) -> "ActivityReadModel":
         return ActivityReadModel(
             id=activity.id,
+            uuid=activity.uuid,
             type=activity.type.value,
             school=activity.school,
             category=activity.category.value,
