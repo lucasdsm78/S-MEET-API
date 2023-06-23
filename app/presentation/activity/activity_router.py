@@ -9,8 +9,9 @@ from app.application.activities.activity_command_model import ActivityCreateResp
 from app.application.activities.activity_command_usecase import ActivityCommandUseCase
 from app.application.activities.activity_query_model import ActivityReadModel
 from app.application.activities.activity_query_usecase import ActivityQueryUseCase
-from app.dependency_injections import activity_command_usecase, activity_query_usecase, current_user
+from app.dependency_injections import activity_command_usecase, activity_query_usecase, current_user, file_uploader_dependency
 from app.domain.activity.exception.activity_exception import ActivitiesNotFoundError, ActivityNotFoundError
+from app.domain.services.file_uploader.file_uploader import FileUploader
 from app.domain.user.exception.user_exception import UserNotFoundError
 from app.presentation.activity.activity_error_message import ErrorMessageActivitiesNotFound, \
     ErrorMessageActivityNotFound
@@ -52,11 +53,11 @@ async def create_activity(
 async def upload_image_activity(
         activity_uuid: str,
         image: UploadFile = File(...),
-        activity_command_usecase: ActivityCommandUseCase = Depends(activity_command_usecase),
+        file_uploader: FileUploader = Depends(file_uploader_dependency),
         current_user: dict = Depends(current_user)
 ):
     try:
-        image_filename = activity_command_usecase.save_image_file(image, activity_uuid)
+        image_filename = file_uploader.save_image_file('activity', image, activity_uuid)
 
     except ActivityNotFoundError as e:
         raise HTTPException(

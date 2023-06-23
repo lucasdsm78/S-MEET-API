@@ -2,7 +2,7 @@ from typing import Optional
 
 from pydantic import Field, BaseModel
 
-from app.domain.user.model.user_bio import UserBio
+from app.domain.user.bio.model.user_bio import UserBio
 
 
 class UserBioReadModel(BaseModel):

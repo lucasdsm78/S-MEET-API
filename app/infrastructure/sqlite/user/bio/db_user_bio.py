@@ -2,7 +2,7 @@ from typing import Union, Optional
 
 from sqlalchemy import Column, Integer, String
 
-from app.domain.user.model.user_bio import UserBio
+from app.domain.user.bio.model.user_bio import UserBio
 from app.infrastructure.sqlite.database import Base
 
 

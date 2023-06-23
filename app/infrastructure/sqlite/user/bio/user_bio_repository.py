@@ -5,7 +5,7 @@ from sqlalchemy.orm.session import Session
 
 from app.domain.user.bio.repository.user_bio_repository import UserBioRepository
 from app.domain.user.exception.user_exception import UserBioNotFoundError
-from app.domain.user.model.user_bio import UserBio
+from app.domain.user.bio.model.user_bio import UserBio
 from app.infrastructure.sqlite.user.bio.db_user_bio import DBUserBio
 from app.infrastructure.sqlite.user.db_user import DBUser
 

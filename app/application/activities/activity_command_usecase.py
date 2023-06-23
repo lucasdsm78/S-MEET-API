@@ -36,10 +36,6 @@ class ActivityCommandUseCase(ABC):
     def delete_participant(self, activity_id: int, email: str) -> ActivityCancelParticipationResponse:
         raise NotImplementedError
 
-    @abstractmethod
-    def save_image_file(self, image: UploadFile, activity_uuid: str) -> str:
-        raise NotImplementedError
-
 
 class ActivityCommandUseCaseImpl(ActivityCommandUseCase):
     """ActivityCommandUseCaseImpl implements a command usecases related Activity entity."""
@@ -89,20 +85,6 @@ class ActivityCommandUseCaseImpl(ActivityCommandUseCase):
             raise
 
         return activity.uuid
-
-    def save_image_file(self, image: UploadFile, activity_uuid: str) -> str:
-        activity = self.activity_repository.find_by_uuid(activity_uuid)
-        if not activity:
-            raise ActivityNotFoundError
-
-        save_path = os.path.join(f"images/activity/{activity.uuid}", image.filename)
-
-        os.makedirs(f"images/activity/{activity.uuid}", exist_ok=True)
-
-        with open(save_path, "wb") as f:
-            shutil.copyfileobj(image.file, f)
-
-        return save_path
 
     def add_participant(self, activity_id: int, email: str) -> ActivityParticipateResponse:
         try:

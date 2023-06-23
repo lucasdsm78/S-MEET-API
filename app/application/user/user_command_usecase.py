@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import shortuuid
 
 from app.application.user.user_command_model import UserCreateModel, UserLoginModel, \
     UserLoginResponse, InvalidPasswordError
@@ -12,7 +13,7 @@ from app.domain.user.model.email import Email
 from app.domain.user.model.password import Password
 from app.domain.user.model.school import School
 from app.domain.user.model.user import User
-from app.domain.user.model.user_bio import UserBio
+from app.domain.user.bio.model.user_bio import UserBio
 from app.domain.user.repository.user_repository import UserRepository
 
 
@@ -55,15 +56,20 @@ class UserCommandUseCaseImpl(UserCommandUseCase):
 
             user_bio_id = self.user_bio_repository.last()
 
+            uuid = shortuuid.uuid()
+
             email = Email(data.email)
             user = User(
                 email=email,
                 pseudo=data.pseudo,
+                uuid=uuid,
+                image_profil=f"images/user/{uuid}/{data.image_profil}",
                 first_name=data.first_name,
                 last_name=data.last_name,
                 school=School(name=school.name, id=school.id),
                 password=Password(self.hasher.bcrypt(data.password)),
-                user_bio_id=user_bio_id)
+                user_bio_id=user_bio_id
+            )
 
             existing_user = self.user_repository.find_by_email(data.email)
             if existing_user is not None:
@@ -81,6 +87,7 @@ class UserCommandUseCaseImpl(UserCommandUseCase):
             raise
 
         return UserLoginResponse(
+            uuid=user.uuid,
             tokenAuth=self.manager_token.generate_token_login(user),
             tokenExpiration=self.manager_token.generate_expiration_token_login(user),
         )
@@ -93,6 +100,7 @@ class UserCommandUseCaseImpl(UserCommandUseCase):
             raise InvalidPasswordError(user_login_model.email)
 
         return UserLoginResponse(
+            uuid=user.uuid,
             tokenAuth=self.manager_token.generate_token_login(user),
             tokenExpiration=self.manager_token.generate_expiration_token_login(user),
         )

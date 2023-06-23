@@ -21,7 +21,9 @@ class DBUser(Base):
     __tablename__ = "user"
     id: Union[int, Column] = Column(Integer, primary_key=True, autoincrement=True)
     email: Union[str, Column] = Column(String(17), unique=True, nullable=False)
+    uuid: Union[str, Column] = Column(String, unique=True, nullable=False)
     password: Union[str, Column] = Column(String, nullable=True)
+    image_profil: Union[str, Column] = Column(String, nullable=False)
     created_at: Union[int, Column] = Column(Integer, index=True, nullable=False)
     updated_at: Union[int, Column] = Column(Integer, index=True, nullable=False)
     first_name: Union[str, Column] = Column(String, nullable=False)
@@ -40,6 +42,8 @@ class DBUser(Base):
     def to_entity(self) -> User:
         return User(
             id=self.id,
+            uuid=self.uuid,
+            image_profil=self.image_profil,
             email=Email(self.email),
             password=Password(self.password),
             created_at=self.created_at,
@@ -56,6 +60,8 @@ class DBUser(Base):
         now = unixtimestamp()
         user_db_to_update = db_user if db_user is not None else DBUser()
         user_db_to_update.id = user.id
+        user_db_to_update.uuid = user.uuid
+        user_db_to_update.image_profil = user.image_profil
         user_db_to_update.email = user.email.value
         user_db_to_update.password = user.password.password
         user_db_to_update.created_at = now

@@ -6,6 +6,7 @@ class UserCreateModel(BaseModel):
 
     pseudo: str = Field(example="lucasdsm")
     first_name: str = Field(example="Lucas")
+    image_profil: str
     last_name: str = Field(example="Da Silva Marques")
     email: str = Field(example="lucas@esieeit.fr")
     password: str = Field(example="password")
@@ -23,11 +24,13 @@ class UserLoginModel(BaseModel):
 
 class UserLoginResponse(BaseModel):
     token_auth: str = Field(alias="tokenAuth")
+    uuid: str = Field()
     token_expiration: str = Field(alias="tokenExpiration")
 
     def for_login(self):
         return dict(
             tokenAuth=self.token_auth,
+            uuid=self.uuid,
             tokenExpiration=self.token_expiration,
             message="login successful"
         )

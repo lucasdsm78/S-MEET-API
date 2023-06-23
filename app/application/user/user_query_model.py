@@ -10,6 +10,8 @@ class UserReadModel(BaseModel):
     email: str = Field(example="lucas@esiee-it.fr")
     first_name: str = Field(example="lucas")
     last_name: str = Field(example="Da Silva")
+    uuid: str = Field(example="kiuyueicioe")
+    image_profil: str = Field(example="images/user/1/image.png")
     pseudo: str = Field(example="lucasdsm")
     createdAt: int = Field(example=1136214245000)
     updatedAt: int = Field(example=1136214245000)
@@ -22,6 +24,8 @@ class UserReadModel(BaseModel):
     def from_entity(user: User) -> "UserReadModel":
         return UserReadModel(
             id=user.id,
+            uuid=user.uuid,
+            image_profil=user.image_profil,
             email=user.email.value,
             createdAt=user.created_at,
             updatedAt=user.updated_at,

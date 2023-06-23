@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Optional
 
 from pydantic import BaseModel
+from fastapi.responses import FileResponse
 
 from app.application.user.user_query_model import UserReadModel, ListParticipantsResponse
 from app.domain.user.exception.user_exception import UserNotFoundError
@@ -20,6 +21,10 @@ class UserQueryUseCase(ABC):
 
     @abstractmethod
     def fetch_users_by_activity(self, activity_id: int) -> dict:
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_image_user(self, user_id: int) -> FileResponse:
         raise NotImplementedError
 
 
@@ -60,3 +65,10 @@ class UserQueryUseCaseImpl(UserQueryUseCase, BaseModel):
             )
         except Exception as e:
             raise
+
+    def get_image_user(self, user_id: int) -> FileResponse:
+        user = self.user_repository.find_by_id(user_id)
+        if not user:
+            raise UserNotFoundError
+
+        return FileResponse(user.image_profil)
