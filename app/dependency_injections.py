@@ -18,6 +18,7 @@ from app.domain.chat.room.repository.room_participant_repository import RoomPart
 from app.domain.chat.room.repository.room_repository import RoomRepository
 from app.domain.quiz.repository.quiz_repository import QuizRepository
 from app.domain.school.repository.school_repository import SchoolRepository
+from app.domain.services.file_uploader.file_uploader import FileUploader
 from app.domain.services.hash import Hash
 from app.domain.services.manager_token import ManagerToken
 from app.domain.services.socket_manager.socket_manager import SocketManager
@@ -32,6 +33,7 @@ from fastapi import Depends
 from sqlalchemy.orm.session import Session
 
 from app.infrastructure.services.authentication import AuthenticationToken
+from app.infrastructure.services.file_uploader.file_uploader import FileUploaderImpl
 from app.infrastructure.services.hash import HashImpl
 from app.infrastructure.services.jwt_bearer import JwtBearer
 from app.infrastructure.services.manager_token import JwtManagerTokenImpl
@@ -69,6 +71,9 @@ def get_settings() -> Settings:
 def socket_manager_dependency() -> SocketManager:
     return SocketManagerImpl()
 
+
+def file_uploader_dependency() -> FileUploader:
+    return FileUploaderImpl()
 
 def manager_token_dependency(settings: Settings = Depends(get_settings)) -> ManagerToken:
     return JwtManagerTokenImpl(settings=settings)

@@ -13,6 +13,8 @@ class User:
             self,
             email: Email,
             pseudo: str,
+            image_profil: str,
+            uuid: str,
             first_name: str,
             last_name: str,
             school: School,
@@ -24,7 +26,9 @@ class User:
     ):
         self.id: Optional[int] = id
         self.password: Password = password
+        self.uuid: str = uuid
         self.email: Email = email
+        self.image_profil = image_profil
         self.created_at: Optional[int] = created_at
         self.school: School = school
         self.pseudo: str = pseudo
@@ -36,6 +40,8 @@ class User:
     def token_details(self) -> dict:
         return dict(
             email=self.email.value,
+            uuid=self.uuid,
+            image_profil=self.image_profil,
             pseudo=self.pseudo,
             first_name=self.first_name,
             last_name=self.last_name,

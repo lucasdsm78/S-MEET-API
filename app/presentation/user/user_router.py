@@ -1,11 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Query, UploadFile, File
 
 from app.application.user.user_command_model import UserCreateResponse, UserCreateModel, UserLoginResponse, \
     UserLoginModel
 from app.application.user.user_command_usecase import UserCommandUseCase
 from app.application.user.user_query_model import UserReadModel
+from fastapi.responses import FileResponse
 from app.application.user.user_query_usecase import UserQueryUseCase
-from app.dependency_injections import user_command_usecase, user_query_usecase
+from app.dependency_injections import user_command_usecase, user_query_usecase, file_uploader_dependency, current_user
+from app.domain.services.file_uploader.file_uploader import FileUploader
 from app.domain.user.exception.user_exception import UserEmailAlreadyExistsError, UsersNotFoundError, UserNotFoundError
 from app.presentation.user.user_error_message import ErrorMessageUserEmailAlreadyExists, ErrorMessageUsersNotFound, \
     ErrorMessageUserNotFound
@@ -44,6 +46,64 @@ async def create_user(
         raise
 
     return user
+
+@router.post(
+    "/user/image/upload",
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorMessageUserNotFound,
+        }
+    }
+)
+async def upload_image_profil(
+        user_uuid: str,
+        image: UploadFile = File(...),
+        file_uploader: FileUploader = Depends(file_uploader_dependency),
+):
+    try:
+        image_filename = file_uploader.save_image_file('user', image, user_uuid)
+
+    except UserNotFoundError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=e.message,
+        )
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+    return image_filename
+
+@router.get(
+    "/user/image/{user_id}",
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorMessageUserNotFound,
+        }
+    }
+)
+async def get_image_profil(
+        user_id: int,
+        user_query_usecase: UserQueryUseCase = Depends(user_query_usecase),
+        current_user: dict = Depends(current_user)
+):
+    try:
+        return user_query_usecase.get_image_user(user_id)
+
+    except UserNotFoundError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=e.message,
+        )
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
 
 
 @router.get(
