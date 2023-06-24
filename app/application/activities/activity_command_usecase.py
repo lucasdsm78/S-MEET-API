@@ -7,7 +7,7 @@ from datetime import datetime
 from fastapi import UploadFile
 
 from app.application.activities.activity_command_model import ActivityCreateModel, ActivityCreateResponse, \
-    ActivityParticipateResponse, ActivityCancelParticipationResponse
+    ActivityParticipateResponse, ActivityCancelParticipationResponse, ActivityDeleteResponse
 from app.domain.activity.exception.activity_exception import ActivityNotFoundError
 from app.domain.activity.model.activity import Activity
 from app.domain.activity.model.activity_participants import ActivityParticipant
@@ -35,6 +35,10 @@ class ActivityCommandUseCase(ABC):
 
     @abstractmethod
     def delete_participant(self, activity_id: int, email: str) -> ActivityCancelParticipationResponse:
+        raise NotImplementedError
+
+    @abstractmethod
+    def delete_activity(self, activity_id: int) -> ActivityDeleteResponse:
         raise NotImplementedError
 
 
@@ -121,3 +125,17 @@ class ActivityCommandUseCaseImpl(ActivityCommandUseCase):
             raise
 
         return ActivityCancelParticipationResponse()
+
+    def delete_activity(self, activity_id: int) -> ActivityDeleteResponse:
+        try:
+            existing_activity = self.activity_repository.find_by_id(activity_id)
+            if existing_activity is None:
+                raise ActivityNotFoundError
+
+            self.activity_repository.delete_activity(activity_id)
+            self.activity_repository.commit()
+        except:
+            self.activity_repository.rollback()
+            raise
+
+        return ActivityDeleteResponse()

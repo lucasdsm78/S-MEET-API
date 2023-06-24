@@ -5,7 +5,7 @@ from fastapi.responses import FileResponse
 from fastapi.params import Path
 
 from app.application.activities.activity_command_model import ActivityCreateResponse, ActivityCreateModel, \
-    ActivityParticipateResponse, ActivityCancelParticipationResponse
+    ActivityParticipateResponse, ActivityCancelParticipationResponse, ActivityDeleteResponse
 from app.application.activities.activity_command_usecase import ActivityCommandUseCase
 from app.application.activities.activity_query_model import ActivityReadModel
 from app.application.activities.activity_query_usecase import ActivityQueryUseCase
@@ -268,3 +268,34 @@ async def check_participation_activity(
         )
 
     return check_participation
+
+
+@router.delete(
+    "/activity/{id}/delete",
+    status_code=status.HTTP_202_ACCEPTED,
+    summary="Delete a activity",
+    response_model=ActivityDeleteResponse,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorMessageActivityNotFound,
+        },
+    },
+)
+async def delete_activity(
+        id: int,
+        activity_command_usecase: ActivityCommandUseCase = Depends(activity_command_usecase),
+        current_user: dict = Depends(current_user)
+):
+    try:
+        delete_activity = activity_command_usecase.delete_activity(id)
+    except ActivityNotFoundError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=e.message
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+    return delete_activity

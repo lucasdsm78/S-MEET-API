@@ -55,6 +55,12 @@ class ActivityRepositoryImpl(ActivityRepository):
             raise
         return activity_db.to_entity()
 
+    def delete_activity(self, activity_id: int):
+        try:
+            self.session.query(DBActivity).filter_by(id=activity_id).delete()
+        except:
+            raise
+
     def begin(self):
         self.session.begin()
 
