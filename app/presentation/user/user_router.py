@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query, UploadFile, File
 
 from app.application.user.user_command_model import UserCreateResponse, UserCreateModel, UserLoginResponse, \
-    UserLoginModel
+    UserLoginModel, UserDeleteResponse
 from app.application.user.user_command_usecase import UserCommandUseCase
 from app.application.user.user_query_model import UserReadModel
 from fastapi.responses import FileResponse
@@ -203,4 +203,34 @@ async def get_profile(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
-    return user
+    return
+
+@router.delete(
+    "/user/{id}/delete",
+    status_code=status.HTTP_202_ACCEPTED,
+    summary="Delete a user",
+    response_model=UserDeleteResponse,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorMessageUserNotFound,
+        },
+    },
+)
+async def delete_user(
+        id: int,
+        user_command_usecase: UserCommandUseCase = Depends(user_command_usecase),
+        current_user: dict = Depends(current_user)
+):
+    try:
+        delete_user = user_command_usecase.delete_user(id)
+    except UserNotFoundError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=e.message
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+    return delete_user

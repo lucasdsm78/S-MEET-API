@@ -17,6 +17,10 @@ class UserCreateResponse(BaseModel):
     message: str = "The user is well created"
 
 
+class UserDeleteResponse(BaseModel):
+    message: str = "The user is well deleted"
+
+
 class UserLoginModel(BaseModel):
     email: str
     password: str
