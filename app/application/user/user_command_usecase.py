@@ -1,8 +1,11 @@
 from abc import ABC, abstractmethod
+from typing import Optional
+
 import shortuuid
 
 from app.application.user.user_command_model import UserCreateModel, UserLoginModel, \
-    UserLoginResponse, InvalidPasswordError, UserDeleteResponse
+    UserLoginResponse, InvalidPasswordError, UserDeleteResponse, UserUpdateModel
+from app.application.user.user_query_model import UserReadModel
 from app.domain.school.repository.school_repository import SchoolRepository
 from app.domain.services.hash import Hash
 from app.domain.services.manager_token import ManagerToken
@@ -31,6 +34,10 @@ class UserCommandUseCase(ABC):
 
     @abstractmethod
     def delete_user(self, user_id: int) -> UserDeleteResponse:
+        raise NotImplementedError
+
+    @abstractmethod
+    def update_user(self, id: int, data: UserUpdateModel) -> Optional[UserReadModel]:
         raise NotImplementedError
 
 
@@ -123,3 +130,24 @@ class UserCommandUseCaseImpl(UserCommandUseCase):
             raise
 
         return UserDeleteResponse()
+
+    def update_user(self, id: int, data: UserUpdateModel) -> Optional[UserReadModel]:
+        try:
+            existing_user = self.user_repository.find_by_id(id)
+            if existing_user is None:
+                raise UserNotFoundError
+
+            if data.pseudo is not None:
+                existing_user.pseudo = data.pseudo
+
+            if data.image_profil is not None:
+                existing_user.image_profil = data.image_profil
+
+            self.user_repository.update_user(existing_user)
+            updated_user = self.user_repository.find_by_id(existing_user.id)
+            self.user_repository.commit()
+        except:
+            self.user_repository.rollback()
+            raise
+
+        return UserReadModel.from_entity(updated_user)

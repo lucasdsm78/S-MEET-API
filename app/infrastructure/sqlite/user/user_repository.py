@@ -81,6 +81,13 @@ class UserRepositoryImpl(UserRepository):
         except:
             raise
 
+    def update_user(self, user: User):
+        try:
+            _user = self.session.query(DBUser).filter_by(id=user.id).one()
+            user_db = DBUser.from_entity(user, _user)
+        except:
+            raise
+
     def begin(self):
         self.session.begin()
 

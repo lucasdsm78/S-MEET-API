@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query, UploadFile, File
 
 from app.application.user.user_command_model import UserCreateResponse, UserCreateModel, UserLoginResponse, \
-    UserLoginModel, UserDeleteResponse
+    UserLoginModel, UserDeleteResponse, UserUpdateModel
 from app.application.user.user_command_usecase import UserCommandUseCase
 from app.application.user.user_query_model import UserReadModel
 from fastapi.responses import FileResponse
@@ -205,7 +205,7 @@ async def get_profile(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
-    return
+    return user
 
 
 @router.delete(
@@ -237,3 +237,36 @@ async def delete_user(
         )
 
     return delete_user
+
+
+@router.patch(
+    "/user/{user_id}/update",
+    response_model=UserReadModel,
+    summary="Update a user with new pseudo or new image profile",
+    status_code=status.HTTP_202_ACCEPTED,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorMessageUserNotFound,
+        },
+    },
+)
+async def update_user(
+        user_id: int,
+        data: UserUpdateModel,
+        user_command_usecase: UserCommandUseCase = Depends(user_command_usecase),
+        current_user: dict = Depends(current_user)
+):
+    try:
+        updated_user = user_command_usecase.update_user(user_id, data)
+    except UserNotFoundError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=e.message,
+        )
+    except Exception as e:
+        print(e)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+    return updated_user

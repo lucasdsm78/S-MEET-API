@@ -36,5 +36,9 @@ class UserRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def update_user(self, user: User) -> Optional[User]:
+        raise NotImplementedError
+
+    @abstractmethod
     def rollback(self):
         raise NotImplementedError
