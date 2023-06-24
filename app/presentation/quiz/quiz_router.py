@@ -2,7 +2,7 @@ from typing import Union
 
 from fastapi import APIRouter, Depends, HTTPException, status, Query, Body
 from app.application.quiz.quiz_command_model import QuizCreateResponse, QuizCreateModel, ScoreAddedResponse, \
-    ScoreCreateModel
+    ScoreCreateModel, QuizDeleteResponse
 from app.application.quiz.quiz_command_usecase import QuizCommandUseCase
 from app.application.quiz.quiz_query_model import QuizReadModel
 from app.application.quiz.quiz_query_usecase import QuizQueryUseCase
@@ -211,3 +211,34 @@ async def get_quiz_by_id(
         )
 
     return quiz
+
+
+@router.delete(
+    "/quiz/{id}/delete",
+    status_code=status.HTTP_202_ACCEPTED,
+    summary="Delete a quiz",
+    response_model=QuizDeleteResponse,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorMessageQuizNotFound,
+        },
+    },
+)
+async def delete_quiz(
+        id: int,
+        quiz_command_usecase: QuizCommandUseCase = Depends(quiz_command_usecase),
+        current_user: dict = Depends(current_user)
+):
+    try:
+        delete_quiz = quiz_command_usecase.delete_quiz(id)
+    except QuizNotFoundError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=e.message
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+    return delete_quiz

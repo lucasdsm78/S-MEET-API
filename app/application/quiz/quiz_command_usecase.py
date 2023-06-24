@@ -3,9 +3,10 @@ from abc import ABC, abstractmethod
 from app.application.activities.activity_command_model import ActivityCreateModel, ActivityCreateResponse, \
     ActivityParticipateResponse, ActivityCancelParticipationResponse
 from app.application.quiz.quiz_command_model import QuizCreateModel, QuizCreateResponse, ScoreAddedResponse, \
-    ScoreCreateModel
+    ScoreCreateModel, QuizDeleteResponse
 from app.domain.activity.model.category import Category
 from app.domain.activity.model.type import Type
+from app.domain.quiz.exception.quiz_exception import QuizNotFoundError
 from app.domain.quiz.model.properties.question import Question
 from app.domain.quiz.model.properties.score import Score
 from app.domain.quiz.model.quiz import Quiz
@@ -24,6 +25,10 @@ class QuizCommandUseCase(ABC):
 
     @abstractmethod
     def add_score(self, user_id: int, id_quiz: int, score: ScoreCreateModel) -> ScoreAddedResponse:
+        raise NotImplementedError
+
+    @abstractmethod
+    def delete_quiz(self, quiz_id: int) -> QuizDeleteResponse:
         raise NotImplementedError
 
 
@@ -97,3 +102,17 @@ class QuizCommandUseCaseImpl(QuizCommandUseCase):
             raise
 
         return ScoreAddedResponse()
+
+    def delete_quiz(self, quiz_id: int) -> QuizDeleteResponse:
+        try:
+            existing_quiz = self.quiz_repository.find_by_id(quiz_id)
+            if existing_quiz is None:
+                raise QuizNotFoundError
+
+            self.quiz_repository.delete_quiz(quiz_id)
+            self.quiz_repository.commit()
+        except:
+            self.quiz_repository.rollback()
+            raise
+
+        return QuizDeleteResponse()

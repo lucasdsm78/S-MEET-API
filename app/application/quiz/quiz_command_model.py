@@ -35,5 +35,9 @@ class QuizCreateResponse(BaseModel):
     message: str = "The quiz is well created"
 
 
+class QuizDeleteResponse(BaseModel):
+    message: str = "The quiz is well deleted"
+
+
 class ScoreAddedResponse(BaseModel):
     message: str = "The score is well added for this quiz and this user"

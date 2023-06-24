@@ -39,6 +39,10 @@ class QuizRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def delete_quiz(self, quiz_id: int):
+        raise NotImplementedError
+
+    @abstractmethod
     def commit(self):
         raise NotImplementedError
 
