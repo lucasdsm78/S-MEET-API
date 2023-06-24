@@ -47,6 +47,7 @@ async def create_user(
 
     return user
 
+
 @router.post(
     "/user/image/upload",
     status_code=status.HTTP_200_OK,
@@ -76,6 +77,7 @@ async def upload_image_profil(
         )
 
     return image_filename
+
 
 @router.get(
     "/user/image/{user_id}",
@@ -204,6 +206,7 @@ async def get_profile(
         )
 
     return
+
 
 @router.delete(
     "/user/{id}/delete",

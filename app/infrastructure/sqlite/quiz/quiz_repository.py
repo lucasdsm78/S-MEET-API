@@ -112,6 +112,12 @@ class QuizRepositoryImpl(QuizRepository):
 
         return result
 
+    def delete_quiz(self, quiz_id: int):
+        try:
+            self.session.query(DBQuiz).filter_by(id=quiz_id).delete()
+        except:
+            raise
+
     def begin(self):
         self.session.begin()
 
