@@ -24,6 +24,10 @@ class ActivityRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def delete_activity(self, activity_id: int):
+        raise NotImplementedError
+
+    @abstractmethod
     def commit(self):
         raise NotImplementedError
 
