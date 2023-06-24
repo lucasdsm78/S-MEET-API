@@ -32,5 +32,9 @@ class UserRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def delete_user(self, user_id: int):
+        raise NotImplementedError
+
+    @abstractmethod
     def rollback(self):
         raise NotImplementedError

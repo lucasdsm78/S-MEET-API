@@ -75,6 +75,12 @@ class UserRepositoryImpl(UserRepository):
 
         return list(map(lambda user_db: user_db.to_entity(), user_dbs))
 
+    def delete_user(self, user_id: int):
+        try:
+            self.session.query(DBUser).filter_by(id=user_id).delete()
+        except:
+            raise
+
     def begin(self):
         self.session.begin()
 
