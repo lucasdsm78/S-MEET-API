@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel, Field
 
 
@@ -24,6 +26,10 @@ class UserDeleteResponse(BaseModel):
 class UserLoginModel(BaseModel):
     email: str
     password: str
+
+
+class UserUpdateModel(BaseModel):
+    pseudo: Optional[str]
 
 
 class UserLoginResponse(BaseModel):

@@ -9,3 +9,7 @@ class FileUploader(ABC):
     @abstractmethod
     def save_image_file(self, domain: str, image: UploadFile, uuid: str) -> str:
         raise NotImplementedError
+
+    @abstractmethod
+    def delete_image_file(self, image_path: str) -> bool:
+        raise NotImplementedError

@@ -20,3 +20,10 @@ class FileUploaderImpl(FileUploader, BaseModel):
             shutil.copyfileobj(image.file, f)
 
         return save_path
+
+    def delete_image_file(self, image_path: str) -> bool:
+        if os.path.exists(image_path):
+            os.remove(image_path)
+            return True
+        else:
+            return False
