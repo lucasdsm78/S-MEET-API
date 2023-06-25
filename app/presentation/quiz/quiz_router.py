@@ -1,13 +1,14 @@
 from typing import Union
 
-from fastapi import APIRouter, Depends, HTTPException, status, Query, Body
+from fastapi import APIRouter, Depends, HTTPException, status, Query, Body, UploadFile, File
 from app.application.quiz.quiz_command_model import QuizCreateResponse, QuizCreateModel, ScoreAddedResponse, \
     ScoreCreateModel, QuizDeleteResponse
 from app.application.quiz.quiz_command_usecase import QuizCommandUseCase
 from app.application.quiz.quiz_query_model import QuizReadModel
 from app.application.quiz.quiz_query_usecase import QuizQueryUseCase
-from app.dependency_injections import current_user, quiz_command_usecase, quiz_query_usecase
+from app.dependency_injections import current_user, quiz_command_usecase, quiz_query_usecase, file_uploader_dependency
 from app.domain.quiz.exception.quiz_exception import QuizsNotFoundError, ScoreNotFoundError, QuizNotFoundError
+from app.domain.services.file_uploader.file_uploader import FileUploader
 from app.domain.user.exception.user_exception import UserNotFoundError
 from app.presentation.quiz.quiz_error_message import ErrorMessageQuizsNotFound, ErrorMessageQuestionsNotFound, \
     ErrorMessageScoreNotFound, ErrorMessageQuizNotFound
@@ -19,7 +20,7 @@ router = APIRouter(
 
 @router.post(
     "/quiz/create",
-    response_model=QuizCreateResponse,
+    response_model=str,
     summary="Create a quiz",
     status_code=status.HTTP_200_OK,
 )
@@ -242,3 +243,70 @@ async def delete_quiz(
         )
 
     return delete_quiz
+
+
+@router.post(
+    "/quiz/image/upload",
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorMessageQuizNotFound,
+        }
+    }
+)
+
+
+async def upload_image_quiz(
+        quiz_uuid: str,
+        image: UploadFile = File(...),
+        file_uploader: FileUploader = Depends(file_uploader_dependency),
+        current_user: dict = Depends(current_user)
+):
+    try:
+        image_filename = file_uploader.save_image_file('quiz', image, quiz_uuid)
+
+    except QuizNotFoundError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=e.message,
+        )
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=e
+        )
+
+    return image_filename
+
+
+@router.get(
+    "/quiz/image/{quiz_id}",
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorMessageQuizNotFound,
+        }
+    }
+)
+
+
+async def get_image_quiz(
+        quiz_id: int,
+        quiz_query_usecase: QuizQueryUseCase = Depends(quiz_query_usecase),
+        current_user: dict = Depends(current_user)
+):
+    try:
+        return quiz_query_usecase.get_image_quiz(quiz_id)
+
+    except QuizNotFoundError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=e.message,
+        )
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=e
+        )
