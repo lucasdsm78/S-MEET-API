@@ -270,6 +270,7 @@ async def update_user(
         print(e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=e
         )
 
     return updated_user
