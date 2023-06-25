@@ -2,11 +2,13 @@ from abc import ABC, abstractmethod
 from typing import Optional
 
 import shortuuid
+from fastapi import UploadFile
 
 from app.application.user.user_command_model import UserCreateModel, UserLoginModel, \
     UserLoginResponse, InvalidPasswordError, UserDeleteResponse, UserUpdateModel
 from app.application.user.user_query_model import UserReadModel
 from app.domain.school.repository.school_repository import SchoolRepository
+from app.domain.services.file_uploader.file_uploader import FileUploader
 from app.domain.services.hash import Hash
 from app.domain.services.manager_token import ManagerToken
 from app.domain.user.bio.repository.user_bio_repository import UserBioRepository
@@ -37,7 +39,7 @@ class UserCommandUseCase(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def update_user(self, id: int, data: UserUpdateModel) -> Optional[UserReadModel]:
+    def update_user(self, id: int, pseudo: str, image: UploadFile) -> Optional[UserReadModel]:
         raise NotImplementedError
 
 
@@ -50,13 +52,15 @@ class UserCommandUseCaseImpl(UserCommandUseCase):
             school_repository: SchoolRepository,
             user_bio_repository: UserBioRepository,
             hasher: Hash,
-            manager_token: ManagerToken
+            manager_token: ManagerToken,
+            file_uploader: FileUploader
     ):
         self.user_repository: UserRepository = user_repository
         self.school_repository: SchoolRepository = school_repository
         self.user_bio_repository: UserBioRepository = user_bio_repository
         self.hasher = hasher
         self.manager_token = manager_token
+        self.file_uploader = file_uploader
 
     def create(self, data: UserCreateModel) -> UserLoginResponse:
         try:
@@ -131,17 +135,19 @@ class UserCommandUseCaseImpl(UserCommandUseCase):
 
         return UserDeleteResponse()
 
-    def update_user(self, id: int, data: UserUpdateModel) -> Optional[UserReadModel]:
+    def update_user(self, id: int, pseudo: str, image: UploadFile) -> Optional[UserReadModel]:
         try:
             existing_user = self.user_repository.find_by_id(id)
             if existing_user is None:
                 raise UserNotFoundError
 
-            if data.pseudo is not None:
-                existing_user.pseudo = data.pseudo
+            if pseudo is not None:
+                existing_user.pseudo = pseudo
 
-            if data.image_profil is not None:
-                existing_user.image_profil = data.image_profil
+            if image is not None:
+                self.file_uploader.delete_image_file('user', existing_user.image_profil)
+                self.file_uploader.save_image_file('user', image, existing_user.uuid)
+                existing_user.image_profil = f"images/user/{existing_user.uuid}/{image.filename}"
 
             self.user_repository.update_user(existing_user)
             updated_user = self.user_repository.find_by_id(existing_user.id)

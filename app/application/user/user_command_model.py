@@ -30,7 +30,6 @@ class UserLoginModel(BaseModel):
 
 class UserUpdateModel(BaseModel):
     pseudo: Optional[str]
-    image_profil: Optional[str]
 
 
 class UserLoginResponse(BaseModel):

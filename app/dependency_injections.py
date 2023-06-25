@@ -75,6 +75,7 @@ def socket_manager_dependency() -> SocketManager:
 def file_uploader_dependency() -> FileUploader:
     return FileUploaderImpl()
 
+
 def manager_token_dependency(settings: Settings = Depends(get_settings)) -> ManagerToken:
     return JwtManagerTokenImpl(settings=settings)
 
@@ -125,14 +126,16 @@ def user_command_usecase(
         school_repository: SchoolRepository = Depends(school_repository_dependency),
         user_bio_repository: UserBioRepository = Depends(user_bio_repository_dependency),
         hasher: Hash = Depends(hash_dependency),
-        manager_token: ManagerToken = Depends(manager_token_dependency)
+        manager_token: ManagerToken = Depends(manager_token_dependency),
+        file_uploader: FileUploader = Depends(file_uploader_dependency)
 ) -> UserCommandUseCase:
     return UserCommandUseCaseImpl(
         user_repository=user_repository,
         school_repository=school_repository,
         user_bio_repository=user_bio_repository,
         hasher=hasher,
-        manager_token=manager_token
+        manager_token=manager_token,
+        file_uploader=file_uploader
     )
 
 

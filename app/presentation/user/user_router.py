@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import APIRouter, Depends, HTTPException, status, Query, UploadFile, File
 
 from app.application.user.user_command_model import UserCreateResponse, UserCreateModel, UserLoginResponse, \
@@ -252,12 +254,13 @@ async def delete_user(
 )
 async def update_user(
         user_id: int,
-        data: UserUpdateModel,
+        pseudo: Optional[str] = None,
+        image: UploadFile = None,
         user_command_usecase: UserCommandUseCase = Depends(user_command_usecase),
         current_user: dict = Depends(current_user)
 ):
     try:
-        updated_user = user_command_usecase.update_user(user_id, data)
+        updated_user = user_command_usecase.update_user(user_id, pseudo, image)
     except UserNotFoundError as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
