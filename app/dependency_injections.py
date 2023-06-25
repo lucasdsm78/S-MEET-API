@@ -7,6 +7,8 @@ from app.application.chat.room.room_query_usecase import RoomQueryUseCase, RoomQ
 from app.application.quiz.quiz_command_usecase import QuizCommandUseCase, QuizCommandUseCaseImpl
 from app.application.quiz.quiz_query_usecase import QuizQueryUseCase, QuizQueryUseCaseImpl
 from app.application.school.school_command_usecase import SchoolCommandUseCase, SchoolCommandUseCaseImpl
+from app.application.smeet.smeet_command_usecase import SmeetCommandUseCase, SmeetCommandUseCaseImpl
+from app.application.smeet.smeet_query_usecase import SmeetQueryUseCase, SmeetQueryUseCaseImpl
 from app.application.user.bio.user_bio_command_usecase import UserBioCommandUseCase, UserBioCommandUseCaseImpl
 from app.application.user.bio.user_bio_query_usecase import UserBioQueryUseCase, UserBioQueryUseCaseImpl
 from app.application.user.user_command_usecase import UserCommandUseCase, UserCommandUseCaseImpl
@@ -22,6 +24,7 @@ from app.domain.services.file_uploader.file_uploader import FileUploader
 from app.domain.services.hash import Hash
 from app.domain.services.manager_token import ManagerToken
 from app.domain.services.socket_manager.socket_manager import SocketManager
+from app.domain.smeet.repository.smeet_repository import SmeetRepository
 from app.domain.user.bio.repository.user_bio_repository import UserBioRepository
 from app.domain.user.repository.user_repository import UserRepository
 from app.infrastructure.config import Settings
@@ -46,6 +49,7 @@ from app.infrastructure.sqlite.chat.room.room_repository import RoomRepositoryIm
 from app.infrastructure.sqlite.database import create_tables, SessionLocal
 from app.infrastructure.sqlite.quiz.quiz_repository import QuizRepositoryImpl
 from app.infrastructure.sqlite.school.school_repository import SchoolRepositoryImpl
+from app.infrastructure.sqlite.smeet.smeet_repository import SmeetRepositoryImpl
 from app.infrastructure.sqlite.user.bio.user_bio_repository import UserBioRepositoryImpl
 from app.infrastructure.sqlite.user.user_repository import UserRepositoryImpl
 
@@ -86,6 +90,10 @@ def hash_dependency() -> Hash:
 
 def user_repository_dependency(session: Session = Depends(get_session)) -> UserRepository:
     return UserRepositoryImpl(session)
+
+
+def smeet_repository_dependency(session: Session = Depends(get_session)) -> SmeetRepository:
+    return SmeetRepositoryImpl(session)
 
 
 def user_bio_repository_dependency(session: Session = Depends(get_session)) -> UserBioRepositoryImpl:
@@ -138,6 +146,15 @@ def user_command_usecase(
         file_uploader=file_uploader
     )
 
+def smeet_command_usecase(
+        user_repository: UserRepository = Depends(user_repository_dependency),
+        smeet_repository: SmeetRepository = Depends(smeet_repository_dependency),
+) -> SmeetCommandUseCase:
+    return SmeetCommandUseCaseImpl(
+        user_repository=user_repository,
+        smeet_repository=smeet_repository
+    )
+
 
 def user_bio_command_usecase(
         user_repository: UserRepository = Depends(user_repository_dependency),
@@ -154,6 +171,15 @@ def user_query_usecase(
 ) -> UserQueryUseCase:
     return UserQueryUseCaseImpl(
         user_repository=user_repository
+    )
+
+def smeet_query_usecase(
+        smeet_repository: SmeetRepository = Depends(smeet_repository_dependency),
+        user_repository: UserRepository = Depends(user_repository_dependency),
+) -> SmeetQueryUseCase:
+    return SmeetQueryUseCaseImpl(
+        user_repository=user_repository,
+        smeet_repository=smeet_repository
     )
 
 

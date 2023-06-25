@@ -9,6 +9,7 @@ from app.presentation.school.school_router import router as school_router
 from app.presentation.activity.activity_router import router as activity_router
 from app.presentation.chat.chat_router import router as chat_router
 from app.presentation.quiz.quiz_router import router as quiz_router
+from app.presentation.smeet.smeet_router import router as smeet_router
 
 settings = get_settings()
 app = FastAPI()
@@ -21,6 +22,7 @@ app.include_router(school_router)
 app.include_router(activity_router)
 app.include_router(chat_router)
 app.include_router(quiz_router)
+app.include_router(smeet_router)
 
 # create the database and import models
 
