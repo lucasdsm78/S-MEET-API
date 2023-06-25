@@ -242,7 +242,7 @@ async def delete_user(
 
 
 @router.patch(
-    "/user/{user_id}/update",
+    "/user/update",
     response_model=UserReadModel,
     summary="Update a user with new pseudo or new image profile",
     status_code=status.HTTP_202_ACCEPTED,
@@ -253,14 +253,13 @@ async def delete_user(
     },
 )
 async def update_user(
-        user_id: int,
         pseudo: Optional[str] = None,
         image: UploadFile = None,
         user_command_usecase: UserCommandUseCase = Depends(user_command_usecase),
         current_user: dict = Depends(current_user)
 ):
     try:
-        updated_user = user_command_usecase.update_user(user_id, pseudo, image)
+        updated_user = user_command_usecase.update_user(current_user.get('id', ''), pseudo, image)
     except UserNotFoundError as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
