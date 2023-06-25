@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import shortuuid
 
 from app.application.activities.activity_command_model import ActivityCreateModel, ActivityCreateResponse, \
     ActivityParticipateResponse, ActivityCancelParticipationResponse
@@ -43,11 +44,12 @@ class QuizCommandUseCaseImpl(QuizCommandUseCase):
         self.quiz_repository: QuizRepository = quiz_repository
         self.user_repository: UserRepository = user_repository
 
-    def create(self, email: str, data: QuizCreateModel) -> QuizCreateResponse:
+    def create(self, email: str, data: QuizCreateModel) -> str:
         try:
             # Récupération de l'utilisateur connecté
             user = self.user_repository.find_by_email(email)
             questions = []
+            uuid = shortuuid.uuid()
 
             for question in data.questions:
                 question_new = Question.create(
@@ -63,8 +65,9 @@ class QuizCommandUseCaseImpl(QuizCommandUseCase):
 
             quiz = Quiz(
                 name=data.name,
+                uuid=uuid,
                 nbr_questions=data.nbr_questions,
-                image=data.image,
+                image=f"images/quiz/{uuid}/{data.image}",
                 user=UserSummary(id=user.id, email=user.email),
                 questions=questions
             )
@@ -79,7 +82,7 @@ class QuizCommandUseCaseImpl(QuizCommandUseCase):
             self.quiz_repository.rollback()
             raise
 
-        return QuizCreateResponse()
+        return saved_quiz.uuid
 
     def add_score(self, user_id: int, id_quiz: int, data: ScoreCreateModel) -> ScoreAddedResponse:
         try:

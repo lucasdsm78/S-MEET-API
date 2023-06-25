@@ -8,10 +8,11 @@ class QuizReadModel(BaseModel):
     """QuizReadModel represents data structure as a read model."""
 
     id: int
+    uuid: str = Field(example="kiuyueicioe")
     name: str
     creator_id: int
     nbr_questions: int
-    image: str
+    image: str = Field(example="images/quiz/1/image.png")
     date: int = Field(example=1136214245000)
     updatedAt: int = Field(example=1136214245000)
 
@@ -22,6 +23,7 @@ class QuizReadModel(BaseModel):
     def from_entity_get_all(quiz: Quiz) -> "QuizReadModel":
         return QuizReadModel(
             id=quiz.id,
+            uuid=quiz.uuid,
             name=quiz.name,
             creator_id=quiz.user.id,
             nbr_questions=quiz.nbr_questions,

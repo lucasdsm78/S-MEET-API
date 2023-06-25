@@ -21,6 +21,7 @@ class DBQuiz(Base):
     __tablename__ = "quiz"
     id: Union[int, Column] = Column(Integer, primary_key=True, autoincrement=True)
     name: Union[str, Column] = Column(String, nullable=False)
+    uuid: Union[str, Column] = Column(String, unique=True, nullable=False)
     nbr_questions: Union[int, Column] = Column(Integer, nullable=False)
     image: Union[str, Column] = Column(String, nullable=False)
     user_id: Union[int, Column] = Column(Integer, ForeignKey('user.id'))
@@ -34,6 +35,7 @@ class DBQuiz(Base):
         return Quiz(
             id=self.id,
             name=self.name,
+            uuid=self.uuid,
             nbr_questions=self.nbr_questions,
             image=self.image,
             user=UserSummary(id=self.user_id, email=Email(self.user.email)),
@@ -48,6 +50,7 @@ class DBQuiz(Base):
         quiz_db_to_update = db_quiz if db_quiz is not None else DBQuiz()
         quiz_db_to_update.id = quiz.id
         quiz_db_to_update.name = quiz.name
+        quiz_db_to_update.uuid = quiz.uuid
         quiz_db_to_update.nbr_questions = quiz.nbr_questions
         quiz_db_to_update.image = quiz.image
         quiz_db_to_update.user_id = quiz.user.id

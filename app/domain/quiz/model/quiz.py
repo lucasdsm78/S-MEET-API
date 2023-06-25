@@ -11,6 +11,7 @@ class Quiz:
     def __init__(
             self,
             name: str,
+            uuid: str,
             nbr_questions: int,
             image: str,
             user: UserSummary,
@@ -21,6 +22,7 @@ class Quiz:
     ):
         self.id: Optional[int] = id
         self.name: str = name
+        self.uuid: str = uuid
         self.nbr_questions: int = nbr_questions
         self.image: str = image
         self.user: UserSummary = user

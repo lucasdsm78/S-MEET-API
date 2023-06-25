@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Optional
 
 from pydantic import BaseModel
+from fastapi.responses import FileResponse
 
 from app.application.quiz.quiz_query_model import QuizReadModel, QuestionReadModel
 from app.domain.quiz.exception.quiz_exception import ScoreNotFoundError, QuizNotFoundError
@@ -24,6 +25,10 @@ class QuizQueryUseCase(ABC):
 
     @abstractmethod
     def fetch_quiz_by_id(self, quiz_id: int) -> Optional[QuizReadModel]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_image_quiz(self, quiz_id: int) -> FileResponse:
         raise NotImplementedError
 
 
@@ -86,3 +91,11 @@ class QuizQueryUseCaseImpl(QuizQueryUseCase, BaseModel):
             raise
 
         return QuizReadModel.from_entity_get_all(quiz)
+
+
+    def get_image_quiz(self, quiz_id: int) -> FileResponse:
+        quiz = self.quiz_repository.find_by_id(quiz_id)
+        if not quiz:
+            raise QuizNotFoundError
+
+        return FileResponse(quiz.image)
