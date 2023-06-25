@@ -145,7 +145,7 @@ class UserCommandUseCaseImpl(UserCommandUseCase):
                 existing_user.pseudo = pseudo
 
             if image is not None:
-                self.file_uploader.delete_image_file('user', existing_user.image_profil)
+                self.file_uploader.delete_image_file('user')
                 self.file_uploader.save_image_file('user', image, existing_user.uuid)
                 existing_user.image_profil = f"images/user/{existing_user.uuid}/{image.filename}"
 
