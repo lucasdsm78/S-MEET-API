@@ -40,6 +40,7 @@ class UserBadgeReadModel(BaseModel):
     id: int
     grade: str
     badge_id: int
+    obtention_date: int
 
     class Config:
         arbitrary_types_allowed = True
@@ -50,4 +51,5 @@ class UserBadgeReadModel(BaseModel):
             id=user_badge.id,
             grade=user_badge.grade.value,
             badge_id=user_badge.badge,
+            obtention_date=user_badge.created_at
         )

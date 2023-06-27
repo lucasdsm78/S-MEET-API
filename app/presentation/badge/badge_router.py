@@ -34,6 +34,8 @@ async def create_badge(
 @router.get(
     "/badges",
     response_model=dict,
+    summary="Get all badges available in the app",
+    description="API call to get all badges available in the app",
     status_code=status.HTTP_200_OK,
     responses={
         status.HTTP_404_NOT_FOUND: {
@@ -63,6 +65,8 @@ async def get_badges(
 @router.get(
     "/badges/users",
     response_model=dict,
+    summary="Get all badges for all users",
+    description="API call to get all badges for all users in the app",
     status_code=status.HTTP_200_OK,
     responses={
         status.HTTP_404_NOT_FOUND: {
@@ -90,6 +94,39 @@ async def get_user_badges(
 @router.get(
     "/badges/user",
     response_model=dict,
+    summary="Get badges user connected",
+    description="API call to get all badges for user connected",
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorMessageBadgesNotFound,
+        }
+    }
+)
+async def get_badges_user_connected(
+        badge_query_usecase: BadgeQueryUseCase = Depends(badge_query_usecase),
+        current_user: dict = Depends(current_user)
+):
+    try:
+        badges = badge_query_usecase.fetch_badges_by_user_id(current_user.get('id', ''))
+
+    except Exception as e:
+        raise
+
+    if not len(badges.get("badges")):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=BadgesNotFoundError.message,
+        )
+
+    return badges
+
+
+@router.get(
+    "/badges/user/{id}",
+    response_model=dict,
+    summary="Get all badges for a user",
+    description="Get all badges for a user by this id",
     status_code=status.HTTP_200_OK,
     responses={
         status.HTTP_404_NOT_FOUND: {
@@ -98,11 +135,11 @@ async def get_user_badges(
     }
 )
 async def get_badges_by_user_id(
+        id: int,
         badge_query_usecase: BadgeQueryUseCase = Depends(badge_query_usecase),
-        current_user: dict = Depends(current_user)
 ):
     try:
-        badges = badge_query_usecase.fetch_badges_by_user_id(current_user.get('id', ''))
+        badges = badge_query_usecase.fetch_badges_by_user_id(id)
 
     except Exception as e:
         raise
