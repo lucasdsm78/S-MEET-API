@@ -105,6 +105,14 @@ class ActivityCommandUseCaseImpl(ActivityCommandUseCase):
             self.stat_repository.update_stat(stat)
             self.stat_repository.commit()
 
+            existing_activity = self.activity_repository.find_by_uuid(uuid)
+            activity_participant = ActivityParticipant(
+                user_id=user.id,
+                activity_id=existing_activity.id
+            )
+
+            self.activity_participant_repository.add_participant(activity_participant)
+            self.activity_participant_repository.commit()
 
             badge = self.badge_repository.find_by_name('Organisateur Pro')
 
@@ -130,7 +138,6 @@ class ActivityCommandUseCaseImpl(ActivityCommandUseCase):
 
             else:
                 user_badge = self.badge_repository.find_user_badge_by_user_id_badge_id(user.id, badge.id)
-                print(stat.activities_created)
 
                 if stat.activities_created == 3:
                     grade = Grade.from_str('silver')
@@ -176,6 +183,7 @@ class ActivityCommandUseCaseImpl(ActivityCommandUseCase):
 
         except:
             self.activity_repository.rollback()
+            self.activity_participant_repository.rollback()
             self.badge_repository.rollback()
             self.stat_repository.rollback()
             self.notification_repository.rollback()

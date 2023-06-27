@@ -37,12 +37,28 @@ class UserReadModel(BaseModel):
 
 
 class ListParticipantsResponse(BaseModel):
+    id: int
     first_name: str
     last_name: str
+    email: str
+    uuid: str
+    image_profil: str
+    pseudo: str
+    createdAt: int
+    updatedAt: int
+    user_bio_id: int
 
     @staticmethod
     def from_entity(user: User) -> "ListParticipantsResponse":
         return ListParticipantsResponse(
+            id=user.id,
             first_name=user.first_name,
-            last_name=user.last_name
+            last_name=user.last_name,
+            email=user.email.value,
+            uuid=user.uuid,
+            image_profil=user.image_profil,
+            createdAt=user.created_at,
+            updatedAt=user.updated_at,
+            pseudo=user.pseudo,
+            user_bio_id=user.user_bio_id
         )
