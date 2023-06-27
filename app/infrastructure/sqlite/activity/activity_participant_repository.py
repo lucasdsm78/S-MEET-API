@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm.session import Session
@@ -6,6 +6,7 @@ from sqlalchemy.orm.session import Session
 from app.domain.activity.exception.activity_exception import ActivityParticipantNotFoundError
 from app.domain.activity.model.activity_participants import ActivityParticipant
 from app.domain.activity.repository.activity_participant_repository import ActivityParticipantRepository
+from app.infrastructure.sqlite.activity.db_activity import DBActivity
 from app.infrastructure.sqlite.activity.db_activity_participants import DBActivityParticipants
 
 
@@ -50,6 +51,22 @@ class ActivityParticipantRepositoryImpl(ActivityParticipantRepository):
             raise
 
         return result
+
+    def find_participants_by_activity_id(self, activity_id: int) -> List[ActivityParticipant]:
+        try:
+            participants_dbs = (
+                self.session.query(DBActivityParticipants)
+                .join(DBActivity)
+                .filter(DBActivity.id == activity_id)
+                .all()
+            )
+        except:
+            raise
+
+        if len(participants_dbs) == 0:
+            return []
+
+        return list(map(lambda participant_db: participant_db.to_entity(), participants_dbs))
 
     def count_participations(self, activity_id: int) -> int:
         try:

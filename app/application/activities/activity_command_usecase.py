@@ -330,10 +330,16 @@ class ActivityCommandUseCaseImpl(ActivityCommandUseCase):
             if existing_activity is None:
                 raise ActivityNotFoundError
 
+            participants = self.activity_participant_repository.find_participants_by_activity_id(existing_activity.id)
+            for participant in participants:
+                self.activity_participant_repository.delete_participant(participant.id)
+
             self.activity_repository.delete_activity(activity_id)
             self.activity_repository.commit()
+            self.activity_participant_repository.commit()
         except:
             self.activity_repository.rollback()
+            self.activity_participant_repository.rollback()
             raise
 
         return ActivityDeleteResponse()
