@@ -106,6 +106,7 @@ async def get_smeets_sent(
 @router.get(
     "/smeets/receive",
     response_model=dict,
+    summary="Get smeets for user connected",
     status_code=status.HTTP_200_OK,
     responses={
         status.HTTP_404_NOT_FOUND: {
@@ -119,6 +120,37 @@ async def get_smeets_receive(
 ):
     try:
         smeets = smeet_query_usecase.fetch_smeets_receive(current_user.get('id', ''))
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+    if not len(smeets.get("smeets")):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=SmeetsNotFoundError.message,
+        )
+
+    return smeets
+
+@router.get(
+    "/smeets/user/{id}/receive",
+    response_model=dict,
+    summary="Get smeets for a user by this id",
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorMessageSmeetsNotFound,
+        }
+    }
+)
+async def get_smeets_receive_by_user_id(
+        id: int,
+        smeet_query_usecase: SmeetQueryUseCase = Depends(smeet_query_usecase),
+):
+    try:
+        smeets = smeet_query_usecase.fetch_smeets_receive(id)
 
     except Exception as e:
         raise HTTPException(
