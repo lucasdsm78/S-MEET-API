@@ -284,6 +284,13 @@ class QuizCommandUseCaseImpl(QuizCommandUseCase):
             if existing_quiz is None:
                 raise QuizNotFoundError
 
+            for question in existing_quiz.questions:
+                self.quiz_repository.delete_question(question.id)
+
+            scores = self.quiz_repository.find_scores_by_quiz_id(existing_quiz.id)
+            for score in scores:
+                self.quiz_repository.delete_score(score.id)
+
             self.quiz_repository.delete_quiz(quiz_id)
             self.quiz_repository.commit()
         except:

@@ -77,6 +77,22 @@ class QuizRepositoryImpl(QuizRepository):
 
         return list(map(lambda question_db: question_db.to_entity(), questions_dbs))
 
+    def find_scores_by_quiz_id(self, quiz_id: int) -> List[Score]:
+        try:
+            scores_dbs = (
+                self.session.query(DBScore)
+                .join(DBQuiz)
+                .filter(DBQuiz.id == quiz_id)
+                .all()
+            )
+        except:
+            raise
+
+        if len(scores_dbs) == 0:
+            return []
+
+        return list(map(lambda score_db: score_db.to_entity(), scores_dbs))
+
     def find_by_id(self, quiz_id: int) -> Optional[Quiz]:
         try:
             quiz_db = self.session.query(DBQuiz).filter_by(id=quiz_id).one()
@@ -115,6 +131,18 @@ class QuizRepositoryImpl(QuizRepository):
     def delete_quiz(self, quiz_id: int):
         try:
             self.session.query(DBQuiz).filter_by(id=quiz_id).delete()
+        except:
+            raise
+
+    def delete_question(self, question_id: int):
+        try:
+            self.session.query(DBQuestion).filter_by(id=question_id).delete()
+        except:
+            raise
+
+    def delete_score(self, score_id: int):
+        try:
+            self.session.query(DBScore).filter_by(id=score_id).delete()
         except:
             raise
 

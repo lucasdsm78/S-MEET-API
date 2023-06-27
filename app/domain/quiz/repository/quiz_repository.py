@@ -23,6 +23,10 @@ class QuizRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def find_scores_by_quiz_id(self, quiz_id: int) -> List[Score]:
+        raise NotImplementedError
+
+    @abstractmethod
     def find_by_id(self, quiz_id: int) -> Optional[Quiz]:
         raise NotImplementedError
 
@@ -35,11 +39,19 @@ class QuizRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def delete_score(self, score_id: int):
+        raise NotImplementedError
+
+    @abstractmethod
     def is_played(self, quiz_id: int, user_id: int) -> bool:
         raise NotImplementedError
 
     @abstractmethod
     def delete_quiz(self, quiz_id: int):
+        raise NotImplementedError
+
+    @abstractmethod
+    def delete_question(self, question_id: int):
         raise NotImplementedError
 
     @abstractmethod
