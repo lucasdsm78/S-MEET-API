@@ -8,7 +8,7 @@ from fastapi import UploadFile
 
 from app.application.activities.activity_command_model import ActivityCreateModel, ActivityCreateResponse, \
     ActivityParticipateResponse, ActivityCancelParticipationResponse, ActivityDeleteResponse
-from app.domain.activity.exception.activity_exception import ActivityNotFoundError
+from app.domain.activity.exception.activity_exception import ActivityNotFoundError, MaxParticipantsAtteintsError
 from app.domain.activity.model.activity import Activity
 from app.domain.activity.model.activity_participants import ActivityParticipant
 from app.domain.activity.model.category import Category
@@ -195,6 +195,10 @@ class ActivityCommandUseCaseImpl(ActivityCommandUseCase):
                 user_id=user.id,
                 activity_id=activity.id
             )
+
+            current_count_participations = self.activity_participant_repository.count_participations(activity.id)
+            if current_count_participations == activity.max_members:
+                raise MaxParticipantsAtteintsError
 
             notification = Notification(
                 content=f"L'utilisateur {user.pseudo} a participé à votre activité {activity.name}",

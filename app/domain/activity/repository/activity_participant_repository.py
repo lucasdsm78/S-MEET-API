@@ -20,6 +20,10 @@ class ActivityParticipantRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def count_participations(self, activity_id: int) -> int:
+        raise NotImplementedError
+
+    @abstractmethod
     def delete_participant(self, activity_participant_id: int):
         raise NotImplementedError
 

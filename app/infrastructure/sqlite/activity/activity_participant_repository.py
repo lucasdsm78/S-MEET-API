@@ -51,6 +51,16 @@ class ActivityParticipantRepositoryImpl(ActivityParticipantRepository):
 
         return result
 
+    def count_participations(self, activity_id: int) -> int:
+        try:
+            count = self.session.query(DBActivityParticipants).filter_by(
+                activity_id=activity_id
+            ).count()
+        except Exception:
+            raise
+
+        return count
+
     def delete_participant(self, activity_participant_id: int):
         try:
             self.session.query(DBActivityParticipants).filter_by(id=activity_participant_id).delete()
