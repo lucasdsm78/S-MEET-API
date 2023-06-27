@@ -13,6 +13,7 @@ class TypeNotification(Enum):
     platine = 'platine'
     smeet = 'smeet'
     quiz = 'quiz'
+    beta = 'beta'
 
     @classmethod
     def from_str(cls, type_notif: str) -> "TypeNotification":

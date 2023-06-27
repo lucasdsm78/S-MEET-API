@@ -1,20 +1,12 @@
 from abc import ABC, abstractmethod
 
-from app.application.activities.activity_command_model import ActivityCreateModel, ActivityCreateResponse, \
-    ActivityParticipateResponse, ActivityCancelParticipationResponse, ActivityDeleteResponse
 from app.application.smeet.smeet_command_model import SmeetCreateResponse, SmeetCreateModel
-from app.domain.activity.exception.activity_exception import ActivityNotFoundError
-from app.domain.activity.model.activity import Activity
-from app.domain.activity.model.activity_participants import ActivityParticipant
-from app.domain.activity.model.category import Category
-from app.domain.activity.model.type import Type
-from app.domain.activity.repository.activity_participant_repository import ActivityParticipantRepository
-from app.domain.activity.repository.activity_repository import ActivityRepository
-from app.domain.badge.model.badge_summary import BadgeSummary
 from app.domain.badge.model.properties.grade import Grade
 from app.domain.badge.model.properties.user_badge import UserBadge
 from app.domain.badge.repository.badge_repository import BadgeRepository
-from app.domain.school.repository.school_repository import SchoolRepository
+from app.domain.notification.model.notification import Notification
+from app.domain.notification.model.properties.type_notif import TypeNotification
+from app.domain.notification.repository.notification_repository import NotificationRepository
 from app.domain.smeet.model.smeet import Smeet
 from app.domain.smeet.repository.smeet_repository import SmeetRepository
 from app.domain.stats.repository.stat_repository import StatRepository
@@ -39,12 +31,14 @@ class SmeetCommandUseCaseImpl(SmeetCommandUseCase):
             smeet_repository: SmeetRepository,
             user_repository: UserRepository,
             stat_repository: StatRepository,
-            badge_repository: BadgeRepository
+            badge_repository: BadgeRepository,
+            notification_repository: NotificationRepository
     ):
         self.smeet_repository: SmeetRepository = smeet_repository
         self.user_repository: UserRepository = user_repository
         self.stat_repository: StatRepository = stat_repository
         self.badge_repository: BadgeRepository = badge_repository
+        self.notification_repository: NotificationRepository = notification_repository
 
     def create(self, user_sender_id: int, user_receiver_id: int, data: SmeetCreateModel) -> SmeetCreateResponse:
         try:
@@ -76,33 +70,73 @@ class SmeetCommandUseCaseImpl(SmeetCommandUseCase):
 
             find_user_badge = self.badge_repository.find_user_badge(badge.id, user_sender.id)
             if not find_user_badge:
+                grade = Grade.from_str('bronze')
                 user_badge = UserBadge(
                     badge=badge.id,
                     user=user_sender.id,
-                    grade=Grade.from_str('bronze')
+                    grade=grade
                 )
 
                 self.badge_repository.add_badge_to_user(user_badge)
+
+                notification = Notification(
+                    content=f"Vous avez obtenu le badge {badge.name} avec le grade {grade.value} car vous avez envoyé votre premier smeet",
+                    is_read=False,
+                    type_notif=TypeNotification.from_str('smeet'),
+                    user=UserSummary(id=user_sender.id, email=user_sender.email),
+                )
+
+                self.notification_repository.create(notification)
 
             else:
                 user_badge = self.badge_repository.find_user_badge_by_user_id_badge_id(user_sender.id, badge.id)
 
                 if stat.smeets_send == 10:
-                    user_badge.grade = Grade.from_str('silver')
+                    grade = Grade.from_str('silver')
+                    user_badge.grade = grade
+                    notification = Notification(
+                        content=f"Vous avez obtenu le badge {badge.name} avec le grade {grade.value} car vous avez envoyé {stat.smeets_send} smeets",
+                        is_read=False,
+                        type_notif=TypeNotification.from_str('smeet'),
+                        user=UserSummary(id=user_sender.id, email=user_sender.email),
+                    )
+
+                    self.notification_repository.create(notification)
 
                 if stat.smeets_send == 50:
-                    user_badge.grade = Grade.from_str('gold')
+                    grade = Grade.from_str('gold')
+                    user_badge.grade = grade
+                    notification = Notification(
+                        content=f"Vous avez obtenu le badge {badge.name} avec le grade {grade.value} car vous avez envoyé {stat.smeets_send} smeets",
+                        is_read=False,
+                        type_notif=TypeNotification.from_str('smeet'),
+                        user=UserSummary(id=user_sender.id, email=user_sender.email),
+                    )
+
+                    self.notification_repository.create(notification)
+
 
                 if stat.smeets_send == 100:
-                    user_badge.grade = Grade.from_str('platine')
+                    grade = Grade.from_str('platine')
+                    user_badge.grade = grade
+                    notification = Notification(
+                        content=f"Vous avez obtenu le badge {badge.name} avec le grade {grade.value} car vous avez envoyé {stat.smeets_send} smeets",
+                        is_read=False,
+                        type_notif=TypeNotification.from_str('smeet'),
+                        user=UserSummary(id=user_sender.id, email=user_sender.email),
+                    )
+
+                    self.notification_repository.create(notification)
 
                 self.badge_repository.update_user_badge(user_badge)
 
             self.badge_repository.commit()
+            self.notification_repository.commit()
         except:
             self.smeet_repository.rollback()
             self.badge_repository.rollback()
             self.stat_repository.rollback()
+            self.notification_repository.rollback()
             raise
 
         return SmeetCreateResponse()

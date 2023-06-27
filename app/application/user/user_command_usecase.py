@@ -11,6 +11,9 @@ from app.domain.badge.model.badge_summary import BadgeSummary
 from app.domain.badge.model.properties.grade import Grade
 from app.domain.badge.model.properties.user_badge import UserBadge
 from app.domain.badge.repository.badge_repository import BadgeRepository
+from app.domain.notification.model.notification import Notification
+from app.domain.notification.model.properties.type_notif import TypeNotification
+from app.domain.notification.repository.notification_repository import NotificationRepository
 from app.domain.school.repository.school_repository import SchoolRepository
 from app.domain.services.file_uploader.file_uploader import FileUploader
 from app.domain.services.hash import Hash
@@ -62,7 +65,8 @@ class UserCommandUseCaseImpl(UserCommandUseCase):
             manager_token: ManagerToken,
             file_uploader: FileUploader,
             badge_repository: BadgeRepository,
-            stat_repository: StatRepository
+            stat_repository: StatRepository,
+            notification_repository: NotificationRepository
     ):
         self.user_repository: UserRepository = user_repository
         self.school_repository: SchoolRepository = school_repository
@@ -72,6 +76,7 @@ class UserCommandUseCaseImpl(UserCommandUseCase):
         self.file_uploader = file_uploader
         self.badge_repository: BadgeRepository = badge_repository
         self.stat_repository: StatRepository = stat_repository
+        self.notification_repository: NotificationRepository = notification_repository
 
     def create(self, data: UserCreateModel) -> UserLoginResponse:
         try:
@@ -110,16 +115,27 @@ class UserCommandUseCaseImpl(UserCommandUseCase):
                 raise UserLoginNotFoundError(data.email)
 
             badge = self.badge_repository.find_by_name('Beta testeur')
+            grade = Grade.from_str('bronze')
 
             user_badge = UserBadge(
                 badge=badge.id,
                 user=user.id,
-                grade=Grade.from_str('bronze')
+                grade=grade
             )
 
             self.badge_repository.add_badge_to_user(user_badge)
 
+            notification = Notification(
+                content=f"Vous avez obtenu le badge {badge.name} avec le grade {grade.value} car vous avez participé à la béta de l'application",
+                is_read=False,
+                type_notif=TypeNotification.from_str('beta'),
+                user=UserSummary(id=user.id, email=user.email),
+            )
+
+            self.notification_repository.create(notification)
+
             self.badge_repository.commit()
+            self.notification_repository.commit()
 
             stat = Stat(
                 messages_send=0,
@@ -138,6 +154,7 @@ class UserCommandUseCaseImpl(UserCommandUseCase):
             self.user_repository.rollback()
             self.badge_repository.rollback()
             self.stat_repository.rollback()
+            self.notification_repository.rollback()
             raise
 
         return UserLoginResponse(
