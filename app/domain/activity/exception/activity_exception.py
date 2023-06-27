@@ -37,3 +37,10 @@ class ActivityParticipantNotFoundError(Exception):
 
     def __str__(self):
         return ActivityParticipantNotFoundError.message
+
+
+class MaxParticipantsAtteintsError(Exception):
+    message = "Le max de participants a été atteint"
+
+    def __str__(self):
+        return MaxParticipantsAtteintsError.message

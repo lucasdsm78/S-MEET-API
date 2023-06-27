@@ -10,7 +10,8 @@ from app.application.activities.activity_command_usecase import ActivityCommandU
 from app.application.activities.activity_query_model import ActivityReadModel
 from app.application.activities.activity_query_usecase import ActivityQueryUseCase
 from app.dependency_injections import activity_command_usecase, activity_query_usecase, current_user, file_uploader_dependency
-from app.domain.activity.exception.activity_exception import ActivitiesNotFoundError, ActivityNotFoundError
+from app.domain.activity.exception.activity_exception import ActivitiesNotFoundError, ActivityNotFoundError, \
+    MaxParticipantsAtteintsError
 from app.domain.services.file_uploader.file_uploader import FileUploader
 from app.domain.user.exception.user_exception import UserNotFoundError
 from app.presentation.activity.activity_error_message import ErrorMessageActivitiesNotFound, \
@@ -181,6 +182,12 @@ async def participate_activity(
         )
 
     except UserNotFoundError as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=e.message,
+        )
+
+    except MaxParticipantsAtteintsError as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=e.message,
