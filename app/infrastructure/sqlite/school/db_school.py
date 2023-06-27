@@ -14,6 +14,7 @@ class DBSchool(Base):
     user = relationship("DBUser", back_populates="school")
     activity = relationship("DBActivity", back_populates="school")
     room = relationship("DBRoom", back_populates="school")
+    badge = relationship("DBBadge", back_populates="school")
 
     def to_entity(self) -> School:
         return School(

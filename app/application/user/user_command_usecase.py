@@ -7,10 +7,16 @@ from fastapi import UploadFile
 from app.application.user.user_command_model import UserCreateModel, UserLoginModel, \
     UserLoginResponse, InvalidPasswordError, UserDeleteResponse, UserUpdateModel
 from app.application.user.user_query_model import UserReadModel
+from app.domain.badge.model.badge_summary import BadgeSummary
+from app.domain.badge.model.properties.grade import Grade
+from app.domain.badge.model.properties.user_badge import UserBadge
+from app.domain.badge.repository.badge_repository import BadgeRepository
 from app.domain.school.repository.school_repository import SchoolRepository
 from app.domain.services.file_uploader.file_uploader import FileUploader
 from app.domain.services.hash import Hash
 from app.domain.services.manager_token import ManagerToken
+from app.domain.stats.model.stats import Stat
+from app.domain.stats.repository.stat_repository import StatRepository
 from app.domain.user.bio.repository.user_bio_repository import UserBioRepository
 from app.domain.user.exception.user_exception import UserEmailAlreadyExistsError, UserLoginNotFoundError, \
     UserNotFoundError
@@ -20,6 +26,7 @@ from app.domain.user.model.password import Password
 from app.domain.user.model.school import School
 from app.domain.user.model.user import User
 from app.domain.user.bio.model.user_bio import UserBio
+from app.domain.user.model.user_summary import UserSummary
 from app.domain.user.repository.user_repository import UserRepository
 
 
@@ -53,7 +60,9 @@ class UserCommandUseCaseImpl(UserCommandUseCase):
             user_bio_repository: UserBioRepository,
             hasher: Hash,
             manager_token: ManagerToken,
-            file_uploader: FileUploader
+            file_uploader: FileUploader,
+            badge_repository: BadgeRepository,
+            stat_repository: StatRepository
     ):
         self.user_repository: UserRepository = user_repository
         self.school_repository: SchoolRepository = school_repository
@@ -61,6 +70,8 @@ class UserCommandUseCaseImpl(UserCommandUseCase):
         self.hasher = hasher
         self.manager_token = manager_token
         self.file_uploader = file_uploader
+        self.badge_repository: BadgeRepository = badge_repository
+        self.stat_repository: StatRepository = stat_repository
 
     def create(self, data: UserCreateModel) -> UserLoginResponse:
         try:
@@ -98,8 +109,35 @@ class UserCommandUseCaseImpl(UserCommandUseCase):
             if not user:
                 raise UserLoginNotFoundError(data.email)
 
+            badge = self.badge_repository.find_by_name('Beta testeur')
+
+            user_badge = UserBadge(
+                badge=badge.id,
+                user=user.id,
+                grade=Grade.from_str('bronze')
+            )
+
+            self.badge_repository.add_badge_to_user(user_badge)
+
+            self.badge_repository.commit()
+
+            stat = Stat(
+                messages_send=0,
+                smeets_send=0,
+                quiz_created=0,
+                quiz_played=0,
+                user=UserSummary(email=user.email, id=user.id),
+                events_in=0,
+                activities_in=0,
+                activities_created=0
+            )
+            self.stat_repository.create(stat)
+            self.stat_repository.commit()
+
         except:
             self.user_repository.rollback()
+            self.badge_repository.rollback()
+            self.stat_repository.rollback()
             raise
 
         return UserLoginResponse(
