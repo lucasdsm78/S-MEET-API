@@ -23,6 +23,10 @@ class BadgeRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def find_user_badges_by_user_id(self, user_id: int) -> List[UserBadge]:
+        raise NotImplementedError
+
+    @abstractmethod
     def find_by_id(self, badge_id: int) -> Optional[Badge]:
         raise NotImplementedError
 
@@ -48,6 +52,10 @@ class BadgeRepository(ABC):
 
     @abstractmethod
     def update_user_badge(self, user_badge: UserBadge):
+        raise NotImplementedError
+
+    @abstractmethod
+    def delete_user_badge(self, user_badge_id: int):
         raise NotImplementedError
 
     @abstractmethod

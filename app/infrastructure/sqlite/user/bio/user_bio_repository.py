@@ -50,6 +50,12 @@ class UserBioRepositoryImpl(UserBioRepository):
 
         return last_user_bio_id.id
 
+    def delete_bio(self, user_bio_id: int):
+        try:
+            self.session.query(DBUserBio).filter_by(id=user_bio_id).delete()
+        except:
+            raise
+
     def create(self, user_bio: UserBio):
         print(user_bio.id)
         user_bio_db = DBUserBio.from_entity(user_bio)

@@ -24,6 +24,10 @@ class NotificationRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def delete_notification(self, notification_id: int):
+        raise NotImplementedError
+
+    @abstractmethod
     def commit(self):
         raise NotImplementedError
 

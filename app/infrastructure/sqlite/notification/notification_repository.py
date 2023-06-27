@@ -61,6 +61,12 @@ class NotificationRepositoryImpl(NotificationRepository):
 
         return list(map(lambda notification_db: notification_db.to_entity(), notification_dbs))
 
+    def delete_notification(self, notification_id: int):
+        try:
+            self.session.query(DBNotification).filter_by(id=notification_id).delete()
+        except:
+            raise
+
     def begin(self):
         self.session.begin()
 
