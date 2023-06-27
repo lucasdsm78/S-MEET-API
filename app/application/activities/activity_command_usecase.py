@@ -15,7 +15,12 @@ from app.domain.activity.model.category import Category
 from app.domain.activity.model.type import Type
 from app.domain.activity.repository.activity_participant_repository import ActivityParticipantRepository
 from app.domain.activity.repository.activity_repository import ActivityRepository
+from app.domain.badge.model.badge_summary import BadgeSummary
+from app.domain.badge.model.properties.grade import Grade
+from app.domain.badge.model.properties.user_badge import UserBadge
+from app.domain.badge.repository.badge_repository import BadgeRepository
 from app.domain.school.repository.school_repository import SchoolRepository
+from app.domain.stats.repository.stat_repository import StatRepository
 from app.domain.user.model.user_summary import UserSummary
 
 from app.domain.user.repository.user_repository import UserRepository
@@ -50,11 +55,15 @@ class ActivityCommandUseCaseImpl(ActivityCommandUseCase):
             user_repository: UserRepository,
             school_repository: SchoolRepository,
             activity_participant_repository: ActivityParticipantRepository,
+            stat_repository: StatRepository,
+            badge_repository: BadgeRepository
     ):
         self.activity_repository: ActivityRepository = activity_repository
         self.user_repository: UserRepository = user_repository
         self.school_repository: SchoolRepository = school_repository
         self.activity_participant_repository: ActivityParticipantRepository = activity_participant_repository
+        self.stat_repository: StatRepository = stat_repository
+        self.badge_repository: BadgeRepository = badge_repository
 
     def create(self, email: str, data: ActivityCreateModel) -> str:
         try:
@@ -81,11 +90,50 @@ class ActivityCommandUseCaseImpl(ActivityCommandUseCase):
                 user=UserSummary(id=user.id, email=user.email),
             )
 
+            stat = self.stat_repository.find_by_user_id(user.id)
+            stat.activities_created = stat.activities_created + 1
+
             # Enregistrement dans la base de données
             self.activity_repository.create(activity)
             self.activity_repository.commit()
+            self.stat_repository.update_stat(stat)
+            self.stat_repository.commit()
+
+
+            badge = self.badge_repository.find_by_name('Organisateur Pro')
+
+            find_user_badge = self.badge_repository.find_user_badge(badge.id, user.id)
+            if not find_user_badge:
+                user_badge = UserBadge(
+                    badge=badge.id,
+                    user=user.id,
+                    grade=Grade.from_str('bronze')
+                )
+
+                self.badge_repository.add_badge_to_user(user_badge)
+
+            else:
+                user_badge = self.badge_repository.find_user_badge_by_user_id_badge_id(user.id, badge.id)
+                print(stat.activities_created)
+
+                if stat.activities_created == 3:
+                    user_badge.grade = Grade.from_str('silver')
+
+                if stat.activities_created == 5:
+                    user_badge.grade = Grade.from_str('gold')
+
+                if stat.activities_created == 10:
+                    user_badge.grade = Grade.from_str('platine')
+
+                self.badge_repository.update_user_badge(user_badge)
+
+            self.badge_repository.commit()
+
+
         except:
             self.activity_repository.rollback()
+            self.badge_repository.rollback()
+            self.stat_repository.rollback()
             raise
 
         return activity.uuid
@@ -103,11 +151,46 @@ class ActivityCommandUseCaseImpl(ActivityCommandUseCase):
                 activity_id=activity.id
             )
 
+            stat = self.stat_repository.find_by_user_id(user.id)
+            stat.activities_in = stat.activities_in + 1
+
             # Insertion dans la base de données activity_participants
             self.activity_participant_repository.add_participant(activity_participant)
             self.activity_participant_repository.commit()
+            self.stat_repository.update_stat(stat)
+            self.stat_repository.commit()
+
+            badge = self.badge_repository.find_by_name('Roi de la fête')
+
+            find_user_badge = self.badge_repository.find_user_badge(badge.id, user.id)
+            if not find_user_badge:
+                user_badge = UserBadge(
+                    badge=badge.id,
+                    user=user.id,
+                    grade=Grade.from_str('bronze')
+                )
+
+                self.badge_repository.add_badge_to_user(user_badge)
+
+            else:
+                user_badge = self.badge_repository.find_user_badge_by_user_id_badge_id(user.id, badge.id)
+
+                if stat.activities_in == 5:
+                    user_badge.grade = Grade.from_str('silver')
+
+                if stat.activities_in == 20:
+                    user_badge.grade = Grade.from_str('gold')
+
+                if stat.activities_in == 50:
+                    user_badge.grade = Grade.from_str('platine')
+
+                self.badge_repository.update_user_badge(user_badge)
+
+            self.badge_repository.commit()
         except:
             self.activity_participant_repository.rollback()
+            self.badge_repository.rollback()
+            self.stat_repository.rollback()
             raise
 
         return ActivityParticipateResponse()

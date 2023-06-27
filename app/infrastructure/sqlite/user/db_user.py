@@ -33,6 +33,8 @@ class DBUser(Base):
     user_bio_id: Union[int, Column] = Column(Integer, ForeignKey('user_bio.id'))
     school = relationship("DBSchool", back_populates='user')
     activities = relationship("DBActivity", back_populates="user")
+    stats = relationship("DBStat", back_populates="user")
+    userbadges = relationship("DBUserBadge", back_populates="user")
     quizs = relationship("DBQuiz", back_populates="user")
     scores = relationship("DBScore", back_populates="user")
     messages = relationship("DBMessage", back_populates="user")
