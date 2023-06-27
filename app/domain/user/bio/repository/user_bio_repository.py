@@ -32,5 +32,9 @@ class UserBioRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def delete_bio(self, user_bio_id: int):
+        raise NotImplementedError
+
+    @abstractmethod
     def rollback(self):
         raise NotImplementedError

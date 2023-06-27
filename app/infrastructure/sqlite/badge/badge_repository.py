@@ -54,6 +54,21 @@ class BadgeRepositoryImpl(BadgeRepository):
 
         return list(map(lambda user_badge_db: user_badge_db.to_entity(), user_badge_dbs))
 
+    def find_user_badges_by_user_id(self, user_id: int) -> List[UserBadge]:
+        try:
+            user_badge_dbs = (
+                self.session.query(DBUserBadge)
+                .filter_by(user_id=user_id)
+                .all()
+            )
+        except:
+            raise
+
+        if len(user_badge_dbs) == 0:
+            return []
+
+        return list(map(lambda user_badge_db: user_badge_db.to_entity(), user_badge_dbs))
+
     def find_by_id(self, badge_id: int) -> Optional[Badge]:
         try:
             badge_db = self.session.query(DBBadge).filter_by(id=badge_id).one()
@@ -130,6 +145,11 @@ class BadgeRepositoryImpl(BadgeRepository):
         except:
             raise
 
+    def delete_user_badge(self, user_badge_id: int):
+        try:
+            self.session.query(DBUserBadge).filter_by(id=user_badge_id).delete()
+        except:
+            raise
 
     def begin(self):
         self.session.begin()

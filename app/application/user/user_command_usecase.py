@@ -182,10 +182,32 @@ class UserCommandUseCaseImpl(UserCommandUseCase):
             if existing_user is None:
                 raise UserNotFoundError
 
+            user_badges = self.badge_repository.find_user_badges_by_user_id(existing_user.id)
+            for user_badge in user_badges:
+                self.badge_repository.delete_user_badge(user_badge.id)
+
+            user_bio = self.user_bio_repository.find_bio_by_user_id(existing_user.id)
+            self.user_bio_repository.delete_bio(user_bio.id)
+
+            user_stat = self.stat_repository.find_by_user_id(existing_user.id)
+            self.stat_repository.delete_stat(user_stat.id)
+
+            notifications = self.notification_repository.find_notifications_by_user_id(existing_user.id)
+            for notification in notifications:
+                self.notification_repository.delete_notification(notification.id)
+
             self.user_repository.delete_user(user_id)
             self.user_repository.commit()
+            self.badge_repository.commit()
+            self.user_bio_repository.commit()
+            self.stat_repository.commit()
+            self.notification_repository.commit()
         except:
             self.user_repository.rollback()
+            self.badge_repository.rollback()
+            self.user_bio_repository.rollback()
+            self.stat_repository.rollback()
+            self.notification_repository.rollback()
             raise
 
         return UserDeleteResponse()
