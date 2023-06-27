@@ -11,6 +11,9 @@ from app.domain.badge.model.badge_summary import BadgeSummary
 from app.domain.badge.model.properties.grade import Grade
 from app.domain.badge.model.properties.user_badge import UserBadge
 from app.domain.badge.repository.badge_repository import BadgeRepository
+from app.domain.notification.model.notification import Notification
+from app.domain.notification.model.properties.type_notif import TypeNotification
+from app.domain.notification.repository.notification_repository import NotificationRepository
 from app.domain.quiz.exception.quiz_exception import QuizNotFoundError
 from app.domain.quiz.model.properties.question import Question
 from app.domain.quiz.model.properties.score import Score
@@ -46,12 +49,14 @@ class QuizCommandUseCaseImpl(QuizCommandUseCase):
             quiz_repository: QuizRepository,
             user_repository: UserRepository,
             stat_repository: StatRepository,
-            badge_repository: BadgeRepository
+            badge_repository: BadgeRepository,
+            notification_repository: NotificationRepository
     ):
         self.quiz_repository: QuizRepository = quiz_repository
         self.user_repository: UserRepository = user_repository
         self.stat_repository: StatRepository = stat_repository
         self.badge_repository: BadgeRepository = badge_repository
+        self.notification_repository: NotificationRepository = notification_repository
 
     def create(self, email: str, data: QuizCreateModel) -> str:
         try:
@@ -97,33 +102,72 @@ class QuizCommandUseCaseImpl(QuizCommandUseCase):
 
             find_user_badge = self.badge_repository.find_user_badge(badge.id, user.id)
             if not find_user_badge:
+                grade = Grade.from_str('bronze')
                 user_badge = UserBadge(
                     badge=badge.id,
                     user=user.id,
-                    grade=Grade.from_str('bronze')
+                    grade=grade
                 )
 
                 self.badge_repository.add_badge_to_user(user_badge)
+
+                notification = Notification(
+                    content=f"Vous avez obtenu le badge {badge.name} avec le grade {grade.value} car vous avez créé votre premier quiz",
+                    is_read=False,
+                    type_notif=TypeNotification.from_str('quiz'),
+                    user=UserSummary(id=user.id, email=user.email),
+                )
+
+                self.notification_repository.create(notification)
 
             else:
                 user_badge = self.badge_repository.find_user_badge_by_user_id_badge_id(user.id, badge.id)
 
                 if stat.quiz_created == 5:
-                    user_badge.grade = Grade.from_str('silver')
+                    grade = Grade.from_str('silver')
+                    user_badge.grade = grade
+                    notification = Notification(
+                        content=f"Vous avez obtenu le badge {badge.name} avec le grade {grade.value} car vous avez créé {stat.quiz_created} quizs",
+                        is_read=False,
+                        type_notif=TypeNotification.from_str('quiz'),
+                        user=UserSummary(id=user.id, email=user.email),
+                    )
+
+                    self.notification_repository.create(notification)
 
                 if stat.quiz_created == 10:
-                    user_badge.grade = Grade.from_str('gold')
+                    grade = Grade.from_str('gold')
+                    user_badge.grade = grade
+                    notification = Notification(
+                        content=f"Vous avez obtenu le badge {badge.name} avec le grade {grade.value} car vous avez créé {stat.quiz_created} quizs",
+                        is_read=False,
+                        type_notif=TypeNotification.from_str('quiz'),
+                        user=UserSummary(id=user.id, email=user.email),
+                    )
+
+                    self.notification_repository.create(notification)
 
                 if stat.quiz_created == 20:
-                    user_badge.grade = Grade.from_str('platine')
+                    grade = Grade.from_str('platine')
+                    user_badge.grade = grade
+                    notification = Notification(
+                        content=f"Vous avez obtenu le badge {badge.name} avec le grade {grade.value} car vous avez créé {stat.quiz_created} quizs",
+                        is_read=False,
+                        type_notif=TypeNotification.from_str('quiz'),
+                        user=UserSummary(id=user.id, email=user.email),
+                    )
+
+                    self.notification_repository.create(notification)
 
                 self.badge_repository.update_user_badge(user_badge)
 
             self.badge_repository.commit()
+            self.notification_repository.commit()
         except:
             self.quiz_repository.rollback()
             self.badge_repository.rollback()
             self.stat_repository.rollback()
+            self.notification_repository.rollback()
             raise
 
         return saved_quiz.uuid
@@ -142,6 +186,15 @@ class QuizCommandUseCaseImpl(QuizCommandUseCase):
                 user=UserSummary(id=user.id, email=user.email),
             )
 
+            notification = Notification(
+                content=f"L'utilisateur {user.pseudo} a joué à votre quiz {quiz.name} et a fait le score de {score.score}",
+                is_read=False,
+                type_notif=TypeNotification.from_str('quiz'),
+                user=UserSummary(id=quiz.user.id, email=quiz.user.email),
+            )
+
+            self.notification_repository.create(notification)
+
             stat = self.stat_repository.find_by_user_id(user.id)
             stat.quiz_played = stat.quiz_played + 1
 
@@ -154,38 +207,73 @@ class QuizCommandUseCaseImpl(QuizCommandUseCase):
             badge = self.badge_repository.find_by_name('Expert des quiz')
 
             if stat.quiz_played == 5:
+                grade = Grade.from_str('bronze')
                 user_badge = UserBadge(
                     badge=badge.id,
                     user=user.id,
-                    grade=Grade.from_str('bronze')
+                    grade=grade
                 )
 
                 self.badge_repository.add_badge_to_user(user_badge)
+                notification_badge = Notification(
+                    content=f"Vous avez obtenu le badge {badge.name} avec le grade {grade.value} car vous avez joué à {stat.quiz_played} quizs",
+                    is_read=False,
+                    type_notif=TypeNotification.from_str('quiz'),
+                    user=UserSummary(id=user.id, email=user.email),
+                )
+
+                self.notification_repository.create(notification_badge)
 
             else:
                 if stat.quiz_played == 15:
                     user_badge = self.badge_repository.find_user_badge_by_user_id_badge_id(user.id, badge.id)
-                    print(stat.quiz_played)
-                    user_badge.grade = Grade.from_str('silver')
+                    grade = Grade.from_str('silver')
+                    user_badge.grade = grade
                     self.badge_repository.update_user_badge(user_badge)
+                    notification_badge = Notification(
+                        content=f"Vous avez obtenu le badge {badge.name} avec le grade {grade.value} car vous avez joué à {stat.quiz_played} quizs",
+                        is_read=False,
+                        type_notif=TypeNotification.from_str('quiz'),
+                        user=UserSummary(id=user.id, email=user.email),
+                    )
+
+                    self.notification_repository.create(notification_badge)
 
                 if stat.quiz_played == 50:
                     user_badge = self.badge_repository.find_user_badge_by_user_id_badge_id(user.id, badge.id)
-                    print(stat.quiz_played)
-                    user_badge.grade = Grade.from_str('gold')
+                    grade = Grade.from_str('silver')
+                    user_badge.grade = grade
                     self.badge_repository.update_user_badge(user_badge)
+                    notification_badge = Notification(
+                        content=f"Vous avez obtenu le badge {badge.name} avec le grade {grade.value} car vous avez joué à {stat.quiz_played} quizs",
+                        is_read=False,
+                        type_notif=TypeNotification.from_str('quiz'),
+                        user=UserSummary(id=user.id, email=user.email),
+                    )
+
+                    self.notification_repository.create(notification_badge)
 
                 if stat.quiz_played == 100:
                     user_badge = self.badge_repository.find_user_badge_by_user_id_badge_id(user.id, badge.id)
-                    print(stat.quiz_played)
-                    user_badge.grade = Grade.from_str('platine')
+                    grade = Grade.from_str('platine')
+                    user_badge.grade = grade
                     self.badge_repository.update_user_badge(user_badge)
+                    notification_badge = Notification(
+                        content=f"Vous avez obtenu le badge {badge.name} avec le grade {grade.value} car vous avez joué à {stat.quiz_played} quizs",
+                        is_read=False,
+                        type_notif=TypeNotification.from_str('quiz'),
+                        user=UserSummary(id=user.id, email=user.email),
+                    )
+
+                    self.notification_repository.create(notification_badge)
 
             self.badge_repository.commit()
+            self.notification_repository.commit()
         except:
             self.quiz_repository.rollback()
             self.badge_repository.rollback()
             self.stat_repository.rollback()
+            self.notification_repository.rollback()
             raise
 
         return ScoreAddedResponse()
