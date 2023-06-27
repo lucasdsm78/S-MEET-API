@@ -10,7 +10,6 @@ class TypeNotification(Enum):
     event = 'event'
     activity = 'activity'
     badge = 'badge'
-    platine = 'platine'
     smeet = 'smeet'
     quiz = 'quiz'
     beta = 'beta'

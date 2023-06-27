@@ -195,6 +195,15 @@ class ActivityCommandUseCaseImpl(ActivityCommandUseCase):
                 activity_id=activity.id
             )
 
+            notification = Notification(
+                content=f"L'utilisateur {user.pseudo} a participé à votre activité {activity.name}",
+                is_read=False,
+                type_notif=TypeNotification.from_str('activity'),
+                user=UserSummary(id=activity.user.id, email=activity.user.email),
+            )
+
+            self.notification_repository.create(notification)
+
             stat = self.stat_repository.find_by_user_id(user.id)
             stat.activities_in = stat.activities_in + 1
 
@@ -216,14 +225,14 @@ class ActivityCommandUseCaseImpl(ActivityCommandUseCase):
                 )
 
                 self.badge_repository.add_badge_to_user(user_badge)
-                notification = Notification(
+                notification_badge = Notification(
                     content=f"Vous avez obtenu le badge {badge.name} avec le grade {grade.value} car vous avez participé à votre première activité",
                     is_read=False,
                     type_notif=TypeNotification.from_str('activity'),
                     user=UserSummary(id=user.id, email=user.email),
                 )
 
-                self.notification_repository.create(notification)
+                self.notification_repository.create(notification_badge)
 
             else:
                 user_badge = self.badge_repository.find_user_badge_by_user_id_badge_id(user.id, badge.id)
@@ -231,38 +240,38 @@ class ActivityCommandUseCaseImpl(ActivityCommandUseCase):
                 if stat.activities_in == 5:
                     grade = Grade.from_str('silver')
                     user_badge.grade = grade
-                    notification = Notification(
+                    notification_badge = Notification(
                         content=f"Vous avez obtenu le badge {badge.name} avec le grade {grade.value} car vous avez participé à {stat.activities_in} activités",
                         is_read=False,
                         type_notif=TypeNotification.from_str('activity'),
                         user=UserSummary(id=user.id, email=user.email),
                     )
 
-                    self.notification_repository.create(notification)
+                    self.notification_repository.create(notification_badge)
 
                 if stat.activities_in == 20:
                     grade = Grade.from_str('gold')
                     user_badge.grade = grade
-                    notification = Notification(
+                    notification_badge = Notification(
                         content=f"Vous avez obtenu le badge {badge.name} avec le grade {grade.value} car vous avez participé à {stat.activities_in} activités",
                         is_read=False,
                         type_notif=TypeNotification.from_str('activity'),
                         user=UserSummary(id=user.id, email=user.email),
                     )
 
-                    self.notification_repository.create(notification)
+                    self.notification_repository.create(notification_badge)
 
                 if stat.activities_in == 50:
                     grade = Grade.from_str('platine')
                     user_badge.grade = grade
-                    notification = Notification(
+                    notification_badge = Notification(
                         content=f"Vous avez obtenu le badge {badge.name} avec le grade {grade.value} car vous avez participé à {stat.activities_in} activités",
                         is_read=False,
                         type_notif=TypeNotification.from_str('activity'),
                         user=UserSummary(id=user.id, email=user.email),
                     )
 
-                    self.notification_repository.create(notification)
+                    self.notification_repository.create(notification_badge)
 
                 self.badge_repository.update_user_badge(user_badge)
 
@@ -284,8 +293,20 @@ class ActivityCommandUseCaseImpl(ActivityCommandUseCase):
             activity_participant = self.activity_participant_repository.get_participation(activity.id, user.id)
             self.activity_participant_repository.delete_participant(activity_participant.id)
             self.activity_participant_repository.commit()
+
+
+            notification = Notification(
+                content=f"L'utilisateur {user.pseudo} a quitté votre activité {activity.name}",
+                is_read=False,
+                type_notif=TypeNotification.from_str('activity'),
+                user=UserSummary(id=activity.user.id, email=activity.user.email),
+            )
+
+            self.notification_repository.create(notification)
+            self.notification_repository.commit()
         except:
             self.activity_participant_repository.rollback()
+            self.notification_repository.rollback()
             raise
 
         return ActivityCancelParticipationResponse()

@@ -55,6 +55,15 @@ class SmeetCommandUseCaseImpl(SmeetCommandUseCase):
                 is_edited=data.is_edited
             )
 
+            notification = Notification(
+                content=f"Un utilisateur vous a envoyé le smeet {smeet.content}",
+                is_read=False,
+                type_notif=TypeNotification.from_str('smeet'),
+                user=UserSummary(id=user_receiver.id, email=user_receiver.email),
+            )
+
+            self.notification_repository.create(notification)
+
             stat = self.stat_repository.find_by_user_id(user_sender.id)
             stat.smeets_send = stat.smeets_send + 1
 
@@ -79,14 +88,14 @@ class SmeetCommandUseCaseImpl(SmeetCommandUseCase):
 
                 self.badge_repository.add_badge_to_user(user_badge)
 
-                notification = Notification(
+                notification_badge = Notification(
                     content=f"Vous avez obtenu le badge {badge.name} avec le grade {grade.value} car vous avez envoyé votre premier smeet",
                     is_read=False,
                     type_notif=TypeNotification.from_str('smeet'),
                     user=UserSummary(id=user_sender.id, email=user_sender.email),
                 )
 
-                self.notification_repository.create(notification)
+                self.notification_repository.create(notification_badge)
 
             else:
                 user_badge = self.badge_repository.find_user_badge_by_user_id_badge_id(user_sender.id, badge.id)
@@ -94,39 +103,39 @@ class SmeetCommandUseCaseImpl(SmeetCommandUseCase):
                 if stat.smeets_send == 10:
                     grade = Grade.from_str('silver')
                     user_badge.grade = grade
-                    notification = Notification(
+                    notification_badge = Notification(
                         content=f"Vous avez obtenu le badge {badge.name} avec le grade {grade.value} car vous avez envoyé {stat.smeets_send} smeets",
                         is_read=False,
                         type_notif=TypeNotification.from_str('smeet'),
                         user=UserSummary(id=user_sender.id, email=user_sender.email),
                     )
 
-                    self.notification_repository.create(notification)
+                    self.notification_repository.create(notification_badge)
 
                 if stat.smeets_send == 50:
                     grade = Grade.from_str('gold')
                     user_badge.grade = grade
-                    notification = Notification(
+                    notification_badge = Notification(
                         content=f"Vous avez obtenu le badge {badge.name} avec le grade {grade.value} car vous avez envoyé {stat.smeets_send} smeets",
                         is_read=False,
                         type_notif=TypeNotification.from_str('smeet'),
                         user=UserSummary(id=user_sender.id, email=user_sender.email),
                     )
 
-                    self.notification_repository.create(notification)
+                    self.notification_repository.create(notification_badge)
 
 
                 if stat.smeets_send == 100:
                     grade = Grade.from_str('platine')
                     user_badge.grade = grade
-                    notification = Notification(
+                    notification_badge = Notification(
                         content=f"Vous avez obtenu le badge {badge.name} avec le grade {grade.value} car vous avez envoyé {stat.smeets_send} smeets",
                         is_read=False,
                         type_notif=TypeNotification.from_str('smeet'),
                         user=UserSummary(id=user_sender.id, email=user_sender.email),
                     )
 
-                    self.notification_repository.create(notification)
+                    self.notification_repository.create(notification_badge)
 
                 self.badge_repository.update_user_badge(user_badge)
 

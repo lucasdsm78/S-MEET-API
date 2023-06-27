@@ -186,6 +186,15 @@ class QuizCommandUseCaseImpl(QuizCommandUseCase):
                 user=UserSummary(id=user.id, email=user.email),
             )
 
+            notification = Notification(
+                content=f"L'utilisateur {user.pseudo} a joué à votre quiz {quiz.name} et a fait le score de {score.score}",
+                is_read=False,
+                type_notif=TypeNotification.from_str('quiz'),
+                user=UserSummary(id=quiz.user.id, email=quiz.user.email),
+            )
+
+            self.notification_repository.create(notification)
+
             stat = self.stat_repository.find_by_user_id(user.id)
             stat.quiz_played = stat.quiz_played + 1
 
@@ -206,14 +215,14 @@ class QuizCommandUseCaseImpl(QuizCommandUseCase):
                 )
 
                 self.badge_repository.add_badge_to_user(user_badge)
-                notification = Notification(
+                notification_badge = Notification(
                     content=f"Vous avez obtenu le badge {badge.name} avec le grade {grade.value} car vous avez joué à {stat.quiz_played} quizs",
                     is_read=False,
                     type_notif=TypeNotification.from_str('quiz'),
                     user=UserSummary(id=user.id, email=user.email),
                 )
 
-                self.notification_repository.create(notification)
+                self.notification_repository.create(notification_badge)
 
             else:
                 if stat.quiz_played == 15:
@@ -221,42 +230,42 @@ class QuizCommandUseCaseImpl(QuizCommandUseCase):
                     grade = Grade.from_str('silver')
                     user_badge.grade = grade
                     self.badge_repository.update_user_badge(user_badge)
-                    notification = Notification(
+                    notification_badge = Notification(
                         content=f"Vous avez obtenu le badge {badge.name} avec le grade {grade.value} car vous avez joué à {stat.quiz_played} quizs",
                         is_read=False,
                         type_notif=TypeNotification.from_str('quiz'),
                         user=UserSummary(id=user.id, email=user.email),
                     )
 
-                    self.notification_repository.create(notification)
+                    self.notification_repository.create(notification_badge)
 
                 if stat.quiz_played == 50:
                     user_badge = self.badge_repository.find_user_badge_by_user_id_badge_id(user.id, badge.id)
                     grade = Grade.from_str('silver')
                     user_badge.grade = grade
                     self.badge_repository.update_user_badge(user_badge)
-                    notification = Notification(
+                    notification_badge = Notification(
                         content=f"Vous avez obtenu le badge {badge.name} avec le grade {grade.value} car vous avez joué à {stat.quiz_played} quizs",
                         is_read=False,
                         type_notif=TypeNotification.from_str('quiz'),
                         user=UserSummary(id=user.id, email=user.email),
                     )
 
-                    self.notification_repository.create(notification)
+                    self.notification_repository.create(notification_badge)
 
                 if stat.quiz_played == 100:
                     user_badge = self.badge_repository.find_user_badge_by_user_id_badge_id(user.id, badge.id)
                     grade = Grade.from_str('platine')
                     user_badge.grade = grade
                     self.badge_repository.update_user_badge(user_badge)
-                    notification = Notification(
+                    notification_badge = Notification(
                         content=f"Vous avez obtenu le badge {badge.name} avec le grade {grade.value} car vous avez joué à {stat.quiz_played} quizs",
                         is_read=False,
                         type_notif=TypeNotification.from_str('quiz'),
                         user=UserSummary(id=user.id, email=user.email),
                     )
 
-                    self.notification_repository.create(notification)
+                    self.notification_repository.create(notification_badge)
 
             self.badge_repository.commit()
             self.notification_repository.commit()
