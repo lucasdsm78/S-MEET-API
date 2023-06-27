@@ -6,6 +6,10 @@ from app.application.chat.message.message_command_usecase import MessageCommandU
 from app.application.chat.message.message_query_usecase import MessageQueryUseCase, MessageQueryUseCaseImpl
 from app.application.chat.room.room_command_usecase import RoomCommandUseCase, RoomCommandUseCaseImpl
 from app.application.chat.room.room_query_usecase import RoomQueryUseCase, RoomQueryUseCaseImpl
+from app.application.notification.notification_command_usecase import NotificationCommandUseCase, \
+    NotificationCommandUseCaseImpl
+from app.application.notification.notification_query_usecase import NotificationQueryUseCase, \
+    NotificationQueryUseCaseImpl
 from app.application.quiz.quiz_command_usecase import QuizCommandUseCase, QuizCommandUseCaseImpl
 from app.application.quiz.quiz_query_usecase import QuizQueryUseCase, QuizQueryUseCaseImpl
 from app.application.school.school_command_usecase import SchoolCommandUseCase, SchoolCommandUseCaseImpl
@@ -21,6 +25,7 @@ from app.domain.badge.repository.badge_repository import BadgeRepository
 from app.domain.chat.message.repository.message_repository import MessageRepository
 from app.domain.chat.room.repository.room_participant_repository import RoomParticipantRepository
 from app.domain.chat.room.repository.room_repository import RoomRepository
+from app.domain.notification.repository.notification_repository import NotificationRepository
 from app.domain.quiz.repository.quiz_repository import QuizRepository
 from app.domain.school.repository.school_repository import SchoolRepository
 from app.domain.services.file_uploader.file_uploader import FileUploader
@@ -52,6 +57,7 @@ from app.infrastructure.sqlite.chat.message.message_repository import MessageRep
 from app.infrastructure.sqlite.chat.room.room_participant_repository import RoomParticipantRepositoryImpl
 from app.infrastructure.sqlite.chat.room.room_repository import RoomRepositoryImpl
 from app.infrastructure.sqlite.database import create_tables, SessionLocal
+from app.infrastructure.sqlite.notification.notification_repository import NotificationRepositoryImpl
 from app.infrastructure.sqlite.quiz.quiz_repository import QuizRepositoryImpl
 from app.infrastructure.sqlite.school.school_repository import SchoolRepositoryImpl
 from app.infrastructure.sqlite.smeet.smeet_repository import SmeetRepositoryImpl
@@ -100,6 +106,10 @@ def user_repository_dependency(session: Session = Depends(get_session)) -> UserR
 
 def smeet_repository_dependency(session: Session = Depends(get_session)) -> SmeetRepository:
     return SmeetRepositoryImpl(session)
+
+
+def notification_repository_dependency(session: Session = Depends(get_session)) -> NotificationRepository:
+    return NotificationRepositoryImpl(session)
 
 
 def badge_repository_dependency(session: Session = Depends(get_session)) -> BadgeRepository:
@@ -177,6 +187,15 @@ def smeet_command_usecase(
         badge_repository=badge_repository
     )
 
+def notification_command_usecase(
+        user_repository: UserRepository = Depends(user_repository_dependency),
+        notification_repository: NotificationRepository = Depends(notification_repository_dependency),
+) -> NotificationCommandUseCase:
+    return NotificationCommandUseCaseImpl(
+        user_repository=user_repository,
+        notification_repository=notification_repository,
+    )
+
 
 def user_bio_command_usecase(
         user_repository: UserRepository = Depends(user_repository_dependency),
@@ -202,6 +221,15 @@ def smeet_query_usecase(
     return SmeetQueryUseCaseImpl(
         user_repository=user_repository,
         smeet_repository=smeet_repository
+    )
+
+def notification_query_usecase(
+        notification_repository: NotificationRepository = Depends(notification_repository_dependency),
+        user_repository: UserRepository = Depends(user_repository_dependency),
+) -> NotificationQueryUseCase:
+    return NotificationQueryUseCaseImpl(
+        notification_repository=notification_repository,
+        user_repository=user_repository,
     )
 
 
