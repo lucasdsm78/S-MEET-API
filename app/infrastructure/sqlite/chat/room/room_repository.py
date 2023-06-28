@@ -25,6 +25,15 @@ class RoomRepositoryImpl(RoomRepository):
 
         return room_db.to_entity()
 
+    def find_by_uuid(self, room_uuid: str) -> Optional[Room]:
+        try:
+            room_db = self.session.query(DBRoom).filter_by(uuid=room_uuid).one()
+        except NoResultFound:
+            raise RoomNotFoundError
+        except Exception as e:
+            raise
+        return room_db.to_entity()
+
     def create(self, room: Room):
         room_db = DBRoom.from_entity(room)
         try:

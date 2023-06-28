@@ -26,6 +26,10 @@ class RoomParticipantRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def find_room_by_user_connected_user_id(self, user_connected_id: int, user_id: int) -> List[RoomParticipant]:
+        raise NotImplementedError
+
+    @abstractmethod
     def get_participation_room(self, room_id: int, user_id: int) -> Optional[RoomParticipant]:
         raise NotImplementedError
 

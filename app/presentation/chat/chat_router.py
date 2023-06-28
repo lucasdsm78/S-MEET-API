@@ -385,3 +385,30 @@ async def get_last_message_by_room_id(
         )
 
     return message
+
+
+@router.get(
+    "/room/user/{user_id}",
+    response_model=int,
+    status_code=status.HTTP_200_OK,
+)
+async def get_room_id_between_user_connected_user_id(
+        user_id: int,
+        room_query_usecase: RoomQueryUseCase = Depends(room_query_usecase),
+        current_user: dict = Depends(current_user),
+):
+    try:
+        room_id = room_query_usecase.find_room_by_user_connected_user_id(current_user.get('id', ''), user_id)
+
+    except UserNotFoundError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=e.message,
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=e
+        )
+
+    return room_id

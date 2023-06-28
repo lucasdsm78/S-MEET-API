@@ -11,6 +11,7 @@ class RoomReadModel(BaseModel):
 
     id: int
     name: str
+    uuid: str
     school_id: int
     users: list
     messages: list
@@ -22,6 +23,7 @@ class RoomReadModel(BaseModel):
     def from_entity(room: Room) -> "RoomReadModel":
         return RoomReadModel(
             id=room.id,
+            uuid=room.uuid,
             name=room.name,
             school_id=room.school_id,
             users=room.users,

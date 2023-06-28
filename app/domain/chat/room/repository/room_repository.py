@@ -15,6 +15,9 @@ class RoomRepository(ABC):
     def find_room_by_id(self, room_id: int) -> Optional[Room]:
         raise NotImplementedError
 
+    def find_by_uuid(self, room_uuid: str) -> Optional[Room]:
+        raise NotImplementedError
+
     @abstractmethod
     def commit(self):
         raise NotImplementedError
