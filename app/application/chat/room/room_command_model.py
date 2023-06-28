@@ -18,5 +18,9 @@ class RoomParticipateResponse(BaseModel):
     message: str = "Your participation for the room is well saved"
 
 
+class RoomDeleteResponse(BaseModel):
+    message: str = "The room is well deleted"
+
+
 class RoomCancelParticipationResponse(BaseModel):
     message: str = "Your participation for the room is well canceled"

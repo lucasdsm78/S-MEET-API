@@ -34,6 +34,12 @@ class RoomRepositoryImpl(RoomRepository):
             raise
         return room_db.to_entity()
 
+    def delete_room(self, room_id: int):
+        try:
+            self.session.query(DBRoom).filter_by(id=room_id).delete()
+        except:
+            raise
+
     def create(self, room: Room):
         room_db = DBRoom.from_entity(room)
         try:

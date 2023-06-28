@@ -2,7 +2,8 @@ from abc import ABC, abstractmethod
 import shortuuid
 
 from app.application.chat.room.room_command_model import RoomCreateModel, RoomCreateResponse, RoomParticipateResponse, \
-    RoomCancelParticipationResponse
+    RoomCancelParticipationResponse, RoomDeleteResponse
+from app.domain.chat.room.exception.room_exception import RoomNotFoundError
 from app.domain.chat.room.model.room import Room
 from app.domain.chat.room.model.room_participant import RoomParticipant
 from app.domain.chat.room.repository.room_participant_repository import RoomParticipantRepository
@@ -27,6 +28,10 @@ class RoomCommandUseCase(ABC):
 
     @abstractmethod
     def delete_participant_room(self, room_id: int, user_id: int) -> RoomCancelParticipationResponse:
+        raise NotImplementedError
+
+    @abstractmethod
+    def delete_room(self, room_id: int) -> RoomDeleteResponse:
         raise NotImplementedError
 
 
@@ -59,15 +64,20 @@ class RoomCommandUseCaseImpl(RoomCommandUseCase):
                 users=data.users,
             )
 
+            self.add_participant_room(room_id=room.id, user_id=user_id)
+            self.room_repository.create(room)
+            self.room_repository.commit()
+
+            existing_room = self.room_repository.find_by_uuid(uuid)
+
             for user_in_list in data.users:
                 user = self.user_repository.find_by_email(user_in_list)
                 if user is None:
                     raise UserNotFoundError
+                self.add_participant_room(room_id=existing_room.id, user_id=user.id)
 
-            self.add_participant_room(room_id=room.id, user_id=user_id)
+            self.add_participant_room(room_id=existing_room.id, user_id=user_id)
 
-            self.room_repository.create(room)
-            self.room_repository.commit()
         except:
             self.room_repository.rollback()
             raise
@@ -103,3 +113,23 @@ class RoomCommandUseCaseImpl(RoomCommandUseCase):
             raise
 
         return RoomCancelParticipationResponse()
+
+    def delete_room(self, room_id: int) -> RoomDeleteResponse:
+        try:
+            existing_room = self.room_repository.find_room_by_id(room_id)
+            if existing_room is None:
+                raise RoomNotFoundError
+
+            participants = self.room_participant_repository.find_participants_by_room(existing_room.id)
+            for participant in participants:
+                self.room_participant_repository.delete_participant_room(participant.id)
+
+            self.room_repository.delete_room(room_id)
+            self.room_repository.commit()
+            self.room_participant_repository.commit()
+        except:
+            self.room_repository.rollback()
+            self.room_participant_repository.rollback()
+            raise
+
+        return RoomDeleteResponse()

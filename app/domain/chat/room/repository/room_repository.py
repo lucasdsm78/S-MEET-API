@@ -19,6 +19,10 @@ class RoomRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def delete_room(self, room_id: int):
+        raise NotImplementedError
+
+    @abstractmethod
     def commit(self):
         raise NotImplementedError
 
