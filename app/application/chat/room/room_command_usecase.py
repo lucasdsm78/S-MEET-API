@@ -15,6 +15,7 @@ from app.domain.chat.room.model.room_participant import RoomParticipant
 from app.domain.chat.room.repository.room_participant_repository import RoomParticipantRepository
 from app.domain.chat.room.repository.room_repository import RoomRepository
 from app.domain.school.repository.school_repository import SchoolRepository
+from app.domain.user.exception.user_exception import UserNotFoundError
 from app.domain.user.model.school import School
 from app.domain.user.model.user_summary import UserSummary
 
@@ -63,6 +64,11 @@ class RoomCommandUseCaseImpl(RoomCommandUseCase):
                 image_room=data.image_room,
                 users=data.users,
             )
+
+            for user_in_list in data.users:
+                user = self.user_repository.find_by_email(user_in_list)
+                if user is None:
+                    raise UserNotFoundError
 
             self.add_participant_room(room_id=room.id, user_id=user_id)
 

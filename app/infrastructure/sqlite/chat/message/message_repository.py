@@ -1,7 +1,9 @@
 from typing import Optional, List
 
+from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm.session import Session
 
+from app.domain.chat.message.exception.message_exception import MessageNotFoundError
 from app.domain.chat.message.model.message import Message
 from app.domain.chat.message.repository.message_repository import MessageRepository
 from app.infrastructure.sqlite.chat.message.db_message import DBMessage
@@ -37,6 +39,16 @@ class MessageRepositoryImpl(MessageRepository):
             return []
 
         return list(map(lambda message_db: message_db.to_entity(), messages_dbs))
+
+    def last(self, room_id: int) -> Optional[Message]:
+        try:
+            last_message_db = self.session.query(DBMessage).filter_by(room_id=room_id).order_by(DBMessage.id.desc()).first()
+        except NoResultFound:
+            raise MessageNotFoundError
+        except Exception:
+            raise
+
+        return last_message_db.to_entity()
 
     def begin(self):
         self.session.begin()
