@@ -11,8 +11,9 @@ from app.application.chat.room.room_command_model import RoomCreateResponse, Roo
     RoomCancelParticipationResponse
 from app.application.chat.room.room_command_usecase import RoomCommandUseCase
 from app.application.chat.room.room_query_usecase import RoomQueryUseCase
+from app.application.user.user_query_usecase import UserQueryUseCase
 from app.dependency_injections import current_user, room_repository_dependency, room_command_usecase, \
-    room_query_usecase, message_repository_dependency, message_command_usecase, message_query_usecase
+    room_query_usecase, message_repository_dependency, message_command_usecase, message_query_usecase, user_query_usecase
 from app.domain.chat.message.exception.message_exception import MessagesNotFoundError, MessageNotFoundError
 from app.domain.chat.message.model.message import Message
 from app.domain.chat.room.exception.room_exception import RoomNotFoundError, RoomsNotFoundError
@@ -26,6 +27,8 @@ from app.presentation.user.user_error_message import ErrorMessageUserNotFound, E
 router = APIRouter(
     tags=['chat']
 )
+
+connected_users = set()
 
 html = """
 <!DOCTYPE html>
@@ -69,10 +72,44 @@ manager = SocketManagerImpl()
 connections: Dict[str, WebSocket] = {}
 
 
-@router.get("/chat")
-async def get():
-    return HTMLResponse(html)
+@router.get("/chat/{room_id}")
+async def get(room_id: int):
+    return HTMLResponse("""
+        <html>
+            <head>
+                <title>Room Chat</title>
+            </head>
+            <body>
+                <h1>Room Chat</h1>
+                <div id="chat">
+                    {% for message in messages %}
+                        <p>{{ message.user.name }}: {{ message.content }}</p>
+                    {% endfor %}
+                </div>
+                <script>
+                    var userId = prompt("Please enter your user ID:");
+                    var ws = new WebSocket("ws://localhost:8000/ws/1/2");
+                    ws.onopen = function(event) {
+                        console.log("WebSocket connection established.");
+                    };
+                    ws.onmessage = function(event) {
+                        var chat = document.getElementById("chat");
+                        var message = document.createElement("p");
+                        message.innerText = event.data;
+                        chat.appendChild(message);
+                    };
 
+                    function sendMessage() {
+                        var input = document.getElementById("message");
+                        ws.send(input.value);
+                        input.value = "";
+                    }
+                </script>
+                <input type="text" id="message" />
+                <button onclick="sendMessage()">Send</button>
+            </body>
+        </html>
+    """)
 
 @router.websocket("/room/{room_id}")
 async def room_endpoint(
@@ -122,21 +159,38 @@ async def room_endpoint(
         await manager.broadcast(f"Client #{current_user.get('email', '')} left the chat")
 
 
-@router.websocket("/ws/{user_id}")
-async def websocket_endpoint(websocket: WebSocket, user_id: str):
+@router.websocket("/ws/{room_id}/{user_id}")
+async def websocket_endpoint(
+        websocket: WebSocket,
+        room_id: int,
+        user_id: int,
+        room_query_usecase: RoomQueryUseCase = Depends(room_query_usecase),
+        user_query_usecase: UserQueryUseCase = Depends(user_query_usecase),
+        message_command_usecase: MessageCommandUseCase = Depends(message_command_usecase),
+):
     await manager.connect(websocket)
     print("Connection added")
-
+    user = user_query_usecase.fetch_user_by_id(user_id)
     try:
         while True:
             data = await websocket.receive_text()
+
+            # create message object
+
+            room = room_query_usecase.find_room_by_id(room_id)
+            message = Message(user_id=user.id, content=data, room_id=room.id)
+            message_command_usecase.create(MessageCreateModel(
+                content=message.content,
+                room_id=room.id
+            ), user.id)
+
             # for conn, id in connections.items():
             #  if uid != user_id:
-            await manager.send_personal_message(f"You wrote: {data}", websocket)
-            await manager.broadcast(f"Client #{user_id} says: {data}")
+            await manager.send_personal_message(f"{user.pseudo}: {data}", websocket)
+            # await manager.broadcast(f"Client #{user_id} says: {data}")
     except WebSocketDisconnect:
         manager.disconnect(websocket)
-        await manager.broadcast(f"Client #{user_id} left the chat")
+        await manager.broadcast(f"{user.pseudo} left the chat")
 
 
 @router.post(
