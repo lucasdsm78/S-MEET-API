@@ -335,10 +335,12 @@ def room_query_usecase(
         room_repository: RoomRepository = Depends(room_repository_dependency),
         room_participant_repository: RoomParticipantRepository =
         Depends(room_participant_repository_dependency),
+        user_repository: UserRepository = Depends(user_repository_dependency)
 ) -> RoomQueryUseCase:
     return RoomQueryUseCaseImpl(
         room_repository=room_repository,
-        room_participant_repository=room_participant_repository
+        room_participant_repository=room_participant_repository,
+        user_repository=user_repository
     )
 
 

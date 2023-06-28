@@ -11,6 +11,7 @@ class Room:
     def __init__(
             self,
             name: str,
+            uuid: str,
             description: str,
             school_id: int,
             image_room: str,
@@ -22,6 +23,7 @@ class Room:
         self.id: Optional[int] = id
         self.name: str = name
         self.description: str = description
+        self.uuid: str = uuid
         self.school_id: int = school_id
         self.image_room: str = image_room
         self.messages = []

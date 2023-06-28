@@ -1,5 +1,6 @@
 from typing import Optional, List
 
+from sqlalchemy import and_
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm.session import Session
 
@@ -32,6 +33,17 @@ class RoomParticipantRepositoryImpl(RoomParticipantRepository):
             self.session.query(DBRoomParticipants).filter_by(id=room_participant_id).delete()
         except:
             raise
+
+    def find_room_by_user_connected_user_id(self, user_connected_id: int, user_id: int) -> [RoomParticipant]:
+        try:
+            room_participant_db = self.session.query(DBRoomParticipants).filter(DBRoomParticipants.user_id == user_connected_id,DBRoomParticipants.room_id.in_(self.session.query(DBRoomParticipants.room_id).filter(DBRoomParticipants.user_id == user_id))).all()
+        except:
+            raise
+
+        if len(room_participant_db) == 0:
+            return []
+
+        return list(map(lambda room_participant_db: room_participant_db.to_entity(), room_participant_db))
 
     def find_conversations_by_user(self, user_id: int) -> List[Room]:
         try:

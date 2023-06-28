@@ -18,6 +18,7 @@ class DBRoom(Base):
     __tablename__ = "room"
     id: Union[int, Column] = Column(Integer, primary_key=True, autoincrement=True)
     name: Union[str, Column] = Column(String, nullable=False)
+    uuid: Union[str, Column] = Column(String, unique=True, nullable=False)
     description: Union[str, Column] = Column(String, nullable=False)
     image_room: Union[str, Column] = Column(String, nullable=False)
     school_id: Union[int, Column] = Column(Integer, ForeignKey('school.id'))
@@ -30,6 +31,7 @@ class DBRoom(Base):
     def to_entity(self) -> Room:
         return Room(
             id=self.id,
+            uuid=self.uuid,
             name=self.name,
             description=self.description,
             school_id=self.school_id,
@@ -44,6 +46,7 @@ class DBRoom(Base):
         room_db_to_update = db_room if db_room is not None else DBRoom()
         room_db_to_update.id = room.id
         room_db_to_update.name = room.name
+        room_db_to_update.uuid = room.uuid
         room_db_to_update.image_room = room.image_room
         room_db_to_update.description = room.description
         room_db_to_update.school_id = room.school_id

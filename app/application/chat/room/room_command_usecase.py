@@ -1,23 +1,15 @@
 from abc import ABC, abstractmethod
+import shortuuid
 
-from app.application.activities.activity_command_model import ActivityCreateModel, ActivityCreateResponse, \
-    ActivityParticipateResponse, ActivityCancelParticipationResponse
 from app.application.chat.room.room_command_model import RoomCreateModel, RoomCreateResponse, RoomParticipateResponse, \
     RoomCancelParticipationResponse
-from app.domain.activity.model.activity import Activity
-from app.domain.activity.model.activity_participants import ActivityParticipant
-from app.domain.activity.model.category import Category
-from app.domain.activity.model.type import Type
-from app.domain.activity.repository.activity_participant_repository import ActivityParticipantRepository
-from app.domain.activity.repository.activity_repository import ActivityRepository
 from app.domain.chat.room.model.room import Room
 from app.domain.chat.room.model.room_participant import RoomParticipant
 from app.domain.chat.room.repository.room_participant_repository import RoomParticipantRepository
 from app.domain.chat.room.repository.room_repository import RoomRepository
 from app.domain.school.repository.school_repository import SchoolRepository
 from app.domain.user.exception.user_exception import UserNotFoundError
-from app.domain.user.model.school import School
-from app.domain.user.model.user_summary import UserSummary
+
 
 from app.domain.user.repository.user_repository import UserRepository
 
@@ -56,9 +48,11 @@ class RoomCommandUseCaseImpl(RoomCommandUseCase):
     def create(self, data: RoomCreateModel, school_id: int, user_id: int):
         try:
             school = self.school_repository.find_by_id(school_id)
+            uuid = shortuuid.uuid()
 
             room = Room(
                 name=data.name,
+                uuid=uuid,
                 description=data.description,
                 school_id=school.id,
                 image_room=data.image_room,
