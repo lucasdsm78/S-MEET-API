@@ -13,12 +13,13 @@ from app.application.chat.room.room_command_usecase import RoomCommandUseCase
 from app.application.chat.room.room_query_usecase import RoomQueryUseCase
 from app.dependency_injections import current_user, room_repository_dependency, room_command_usecase, \
     room_query_usecase, message_repository_dependency, message_command_usecase, message_query_usecase
-from app.domain.chat.message.exception.message_exception import MessagesNotFoundError
+from app.domain.chat.message.exception.message_exception import MessagesNotFoundError, MessageNotFoundError
 from app.domain.chat.message.model.message import Message
 from app.domain.chat.room.exception.room_exception import RoomNotFoundError, RoomsNotFoundError
 from app.domain.user.exception.user_exception import UserNotFoundError, UsersNotFoundError
 from app.infrastructure.services.socket_manager.socket_manager import SocketManagerImpl
-from app.presentation.chat.chat_error_message import ErrorMessageRoomNotFound, ErrorMessageRoomsNotFound
+from app.presentation.chat.chat_error_message import ErrorMessageRoomNotFound, ErrorMessageRoomsNotFound, \
+    ErrorMessageMessageNotFound
 from app.presentation.user.user_error_message import ErrorMessageUserNotFound, ErrorMessageUsersNotFound, \
     ErrorMessagesRoomNotFound
 
@@ -151,6 +152,12 @@ async def create_room(
 ):
     try:
         room = room_command_usecase.create(data, current_user.get('school_id', ''), current_user.get('id', ''))
+
+    except UserNotFoundError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=e.message,
+        )
 
     except Exception as e:
         raise
@@ -355,3 +362,26 @@ async def get_messages_by_room(
         )
 
     return messages
+
+@router.get(
+    "/room/{id}/message/last",
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorMessageMessageNotFound,
+        },
+    },
+)
+async def get_last_message_by_room_id(
+        room_id: int,
+        message_query_usecase: MessageQueryUseCase = Depends(message_query_usecase),
+):
+    try:
+        message = message_query_usecase.find_last_message_by_room_id(room_id)
+    except MessageNotFoundError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=e.message,
+        )
+
+    return message

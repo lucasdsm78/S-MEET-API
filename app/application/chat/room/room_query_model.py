@@ -30,6 +30,7 @@ class RoomReadModel(BaseModel):
 
 
 class ListConversationResponse(BaseModel):
+    room_id: int
     name: str
     description: str
     image_room: str
@@ -37,6 +38,7 @@ class ListConversationResponse(BaseModel):
     @staticmethod
     def from_entity(room: Room) -> "ListConversationResponse":
         return ListConversationResponse(
+            room_id=room.id,
             name=room.name,
             description=room.description,
             image_room=room.image_room
@@ -44,14 +46,28 @@ class ListConversationResponse(BaseModel):
 
 
 class ListParticipationsRoomResponse(BaseModel):
-    pseudo: str
+    id: int
+    email: str
     first_name: str
     last_name: str
+    uuid: str
+    image_profil: str
+    pseudo: str
+    createdAt: int
+    updatedAt: int
+    user_bio_id: int
 
     @staticmethod
     def from_entity(user: User) -> "ListParticipationsRoomResponse":
         return ListParticipationsRoomResponse(
-            pseudo=user.pseudo,
+            id=user.id,
+            uuid=user.uuid,
+            image_profil=user.image_profil,
+            email=user.email.value,
+            createdAt=user.created_at,
+            updatedAt=user.updated_at,
             first_name=user.first_name,
-            last_name=user.last_name
+            last_name=user.last_name,
+            pseudo=user.pseudo,
+            user_bio_id=user.user_bio_id
         )

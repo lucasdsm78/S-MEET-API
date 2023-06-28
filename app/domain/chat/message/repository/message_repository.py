@@ -16,6 +16,10 @@ class MessageRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def last(self, room_id: int) -> Optional[Message]:
+        raise NotImplementedError
+
+    @abstractmethod
     def commit(self):
         raise NotImplementedError
 
