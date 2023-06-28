@@ -8,7 +8,7 @@ from app.application.chat.message.message_command_model import MessageCreateResp
 from app.application.chat.message.message_command_usecase import MessageCommandUseCase
 from app.application.chat.message.message_query_usecase import MessageQueryUseCase
 from app.application.chat.room.room_command_model import RoomCreateResponse, RoomCreateModel, RoomParticipateResponse, \
-    RoomCancelParticipationResponse
+    RoomCancelParticipationResponse, RoomDeleteResponse
 from app.application.chat.room.room_command_usecase import RoomCommandUseCase
 from app.application.chat.room.room_query_usecase import RoomQueryUseCase
 from app.application.user.user_query_usecase import UserQueryUseCase
@@ -466,3 +466,33 @@ async def get_room_id_between_user_connected_user_id(
         )
 
     return room_id
+
+@router.delete(
+    "/room/{id}/delete",
+    status_code=status.HTTP_202_ACCEPTED,
+    summary="Delete a room",
+    response_model=RoomDeleteResponse,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorMessageRoomNotFound,
+        },
+    },
+)
+async def delete_room(
+        id: int,
+        room_command_usecase: RoomCommandUseCase = Depends(room_command_usecase),
+        current_user: dict = Depends(current_user)
+):
+    try:
+        delete_room = room_command_usecase.delete_room(id)
+    except RoomNotFoundError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=e.message
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+    return delete_room
