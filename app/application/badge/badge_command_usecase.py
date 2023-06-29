@@ -3,7 +3,8 @@ from typing import Optional
 
 import shortuuid
 
-from app.application.badge.badge_command_model import BadgeCreateModel, BadgeCreateResponse
+from app.application.badge.badge_command_model import BadgeCreateModel, BadgeCreateResponse, BadgeUpdateResponse, \
+    BadgeUpdateModel
 from app.domain.badge.model.badge import Badge
 from app.domain.badge.model.properties.user_badge import UserBadge
 from app.domain.badge.repository.badge_repository import BadgeRepository
@@ -17,6 +18,10 @@ class BadgeCommandUseCase(ABC):
 
     @abstractmethod
     def create(self, data: BadgeCreateModel) -> BadgeCreateResponse:
+        raise NotImplementedError
+
+    @abstractmethod
+    def update_badge(self, badge_id: int, data: BadgeUpdateModel) -> BadgeUpdateResponse:
         raise NotImplementedError
 
 
@@ -57,3 +62,25 @@ class BadgeCommandUseCaseImpl(BadgeCommandUseCase):
             raise
 
         return BadgeCreateResponse()
+
+    def update_badge(self, badge_id: int, data: BadgeUpdateModel) -> BadgeUpdateResponse:
+        try:
+            badge = self.badge_repository.find_by_id(badge_id)
+
+            if data.name is not None:
+                badge.name = data.name
+
+            if data.description is not None:
+                badge.description = data.description
+
+            if data.icon is not None:
+                badge.icon = data.icon
+
+            self.badge_repository.update_badge(badge)
+            self.badge_repository.commit()
+
+        except:
+            self.badge_repository.rollback()
+            raise
+
+        return BadgeUpdateResponse()

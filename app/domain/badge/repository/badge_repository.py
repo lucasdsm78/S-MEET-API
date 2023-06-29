@@ -15,6 +15,10 @@ class BadgeRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def update_badge(self, badge: Badge) -> Optional[Badge]:
+        raise NotImplementedError
+
+    @abstractmethod
     def find_badges(self) -> List[Badge]:
         raise NotImplementedError
 
