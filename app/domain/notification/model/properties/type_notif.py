@@ -11,6 +11,7 @@ class TypeNotification(Enum):
     activity = 'activity'
     badge = 'badge'
     smeet = 'smeet'
+    message = 'message'
     quiz = 'quiz'
     beta = 'beta'
 

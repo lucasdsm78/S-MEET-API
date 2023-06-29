@@ -53,6 +53,7 @@ class RoomCommandUseCaseImpl(RoomCommandUseCase):
     def create(self, data: RoomCreateModel, school_id: int, user_id: int):
         try:
             school = self.school_repository.find_by_id(school_id)
+            user = self.user_repository.find_by_id(user_id)
             uuid = shortuuid.uuid()
 
             room = Room(
@@ -61,22 +62,19 @@ class RoomCommandUseCaseImpl(RoomCommandUseCase):
                 description=data.description,
                 school_id=school.id,
                 image_room=data.image_room,
-                users=data.users,
             )
 
-            self.add_participant_room(room_id=room.id, user_id=user_id)
             self.room_repository.create(room)
             self.room_repository.commit()
 
             existing_room = self.room_repository.find_by_uuid(uuid)
+            self.add_participant_room(room_id=existing_room.id, user_id=user.id)
 
-            for user_in_list in data.users:
-                user = self.user_repository.find_by_email(user_in_list)
-                if user is None:
+            for user_list_data in data.users:
+                user_data = self.user_repository.find_by_email(user_list_data)
+                if user_data is None:
                     raise UserNotFoundError
-                self.add_participant_room(room_id=existing_room.id, user_id=user.id)
-
-            self.add_participant_room(room_id=existing_room.id, user_id=user_id)
+                self.add_participant_room(room_id=existing_room.id, user_id=user_data.id)
 
         except:
             self.room_repository.rollback()
@@ -87,10 +85,11 @@ class RoomCommandUseCaseImpl(RoomCommandUseCase):
     def add_participant_room(self, room_id: int, user_id: int) -> RoomParticipateResponse:
         try:
             user = self.user_repository.find_by_id(user_id)
+            room = self.room_repository.find_room_by_id(room_id)
 
             room_participant = RoomParticipant(
                 user_id=user.id,
-                room_id=room_id
+                room_id=room.id
             )
 
             self.room_participant_repository.add_participant(room_participant)

@@ -16,7 +16,6 @@ class Room:
             school_id: int,
             image_room: str,
             id: Optional[int] = None,
-            users: Optional[list] = None,
             created_at: Optional[int] = None,
             updated_at: Optional[int] = None,
     ):
@@ -27,12 +26,12 @@ class Room:
         self.school_id: int = school_id
         self.image_room: str = image_room
         self.messages = []
-        self.users = users
+        self.users = []
         self.created_at: Optional[int] = created_at
         self.updated_at: Optional[int] = updated_at
 
-    def add_user(self, user: WebSocket):
-        self.users.append(user)
+    def add_user(self, email: str):
+        self.users.append(email)
 
     def remove_user(self, user: WebSocket):
         self.users.remove(user)

@@ -40,6 +40,13 @@ class RoomRepositoryImpl(RoomRepository):
         except:
             raise
 
+    def update_room(self, room: Room):
+        try:
+            _room = self.session.query(DBRoom).filter_by(id=room.id).one()
+            room_db = DBRoom.from_entity(room, _room)
+        except:
+            raise
+
     def create(self, room: Room):
         room_db = DBRoom.from_entity(room)
         try:

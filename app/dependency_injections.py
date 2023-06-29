@@ -363,11 +363,19 @@ def message_command_usecase(
         message_repository: MessageRepository = Depends(message_repository_dependency),
         user_repository: UserRepository = Depends(user_repository_dependency),
         room_repository: RoomRepository = Depends(room_repository_dependency),
+        stat_repository: StatRepository = Depends(stat_repository_dependency),
+        badge_repository: BadgeRepository = Depends(badge_repository_dependency),
+        notification_repository: NotificationRepository = Depends(notification_repository_dependency),
+        room_participant_repository: RoomParticipantRepository = Depends(room_participant_repository_dependency)
 ) -> MessageCommandUseCase:
     return MessageCommandUseCaseImpl(
         message_repository=message_repository,
         user_repository=user_repository,
-        room_repository=room_repository
+        room_repository=room_repository,
+        stat_repository=stat_repository,
+        badge_repository=badge_repository,
+        notification_repository=notification_repository,
+        room_participant_repository=room_participant_repository
     )
 
 
