@@ -241,7 +241,7 @@ class QuizCommandUseCaseImpl(QuizCommandUseCase):
 
                 if stat.quiz_played == 50:
                     user_badge = self.badge_repository.find_user_badge_by_user_id_badge_id(user.id, badge.id)
-                    grade = Grade.from_str('silver')
+                    grade = Grade.from_str('gold')
                     user_badge.grade = grade
                     self.badge_repository.update_user_badge(user_badge)
                     notification_badge = Notification(

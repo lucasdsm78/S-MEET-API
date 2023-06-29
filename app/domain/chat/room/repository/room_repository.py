@@ -23,6 +23,10 @@ class RoomRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def update_room(self, room: Room) -> Optional[Room]:
+        raise NotImplementedError
+
+    @abstractmethod
     def commit(self):
         raise NotImplementedError
 
