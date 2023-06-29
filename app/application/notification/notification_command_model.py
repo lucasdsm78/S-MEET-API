@@ -11,3 +11,7 @@ class NotificationCreateModel(BaseModel):
 
 class NotificationCreateResponse(BaseModel):
     message: str = "The notification is well created"
+
+
+class NotificationUpdateResponse(BaseModel):
+    message: str = "The notification is well updated"

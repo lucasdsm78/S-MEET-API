@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from app.application.notification.notification_command_model import NotificationCreateModel, NotificationCreateResponse
+from app.application.notification.notification_command_model import NotificationCreateModel, NotificationCreateResponse, \
+    NotificationUpdateResponse
 from app.domain.notification.model.notification import Notification
 from app.domain.notification.model.properties.type_notif import TypeNotification
 from app.domain.notification.repository.notification_repository import NotificationRepository
@@ -12,6 +13,10 @@ class NotificationCommandUseCase(ABC):
 
     @abstractmethod
     def create(self, data: NotificationCreateModel, email: str) -> NotificationCreateResponse:
+        raise NotImplementedError
+
+    @abstractmethod
+    def update_notif(self, user_id: int) -> NotificationUpdateResponse:
         raise NotImplementedError
 
 
@@ -47,3 +52,22 @@ class NotificationCommandUseCaseImpl(NotificationCommandUseCase):
             raise
 
         return NotificationCreateResponse()
+
+    def update_notif(self, user_id: int) -> NotificationUpdateResponse:
+        try:
+            # Récupération de l'utilisateur connecté
+            user = self.user_repository.find_by_id(user_id)
+
+            notifs = self.notification_repository.find_notifications_by_user_id(user.id)
+
+            for notif in notifs:
+                if notif.is_read is not True:
+                    notif.is_read = True
+                    self.notification_repository.update_notification(notif)
+                    self.notification_repository.commit()
+
+        except:
+            self.notification_repository.rollback()
+            raise
+
+        return NotificationUpdateResponse()
