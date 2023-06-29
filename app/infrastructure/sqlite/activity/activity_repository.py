@@ -26,6 +26,23 @@ class ActivityRepositoryImpl(ActivityRepository):
         try:
             activity_dbs = (
                 self.session.query(DBActivity)
+                .filter_by(type='activity')
+                .order_by(DBActivity.name)
+                .all()
+            )
+        except:
+            raise
+
+        if len(activity_dbs) == 0:
+            return []
+
+        return list(map(lambda activity_db: activity_db.to_entity(), activity_dbs))
+
+    def find_events(self) -> List[Activity]:
+        try:
+            activity_dbs = (
+                self.session.query(DBActivity)
+                .filter_by(type='event')
                 .order_by(DBActivity.name)
                 .all()
             )

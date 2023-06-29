@@ -20,6 +20,10 @@ class ActivityQueryUseCase(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def fetch_events(self) -> dict:
+        raise NotImplementedError
+
+    @abstractmethod
     def get_activity_by_id(self, activity_id: int, email: str) -> Optional[ActivityReadModel]:
         raise NotImplementedError
 
@@ -46,6 +50,17 @@ class ActivityQueryUseCaseImpl(ActivityQueryUseCase, BaseModel):
             return dict(
                 activities=list(map(lambda activity: ActivityReadModel.from_entity_get_all(
                     activity=activity), activities))
+            )
+
+        except Exception as e:
+            raise
+
+    def fetch_events(self) -> dict:
+        try:
+            events = self.activity_repository.find_events()
+            return dict(
+                events=list(map(lambda event: ActivityReadModel.from_entity_get_all(
+                    activity=event), events))
             )
 
         except Exception as e:

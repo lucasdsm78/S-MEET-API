@@ -16,6 +16,10 @@ class ActivityRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def find_events(self) -> List[Activity]:
+        raise NotImplementedError
+
+    @abstractmethod
     def find_by_id(self, activity_id: int) -> Optional[Activity]:
         raise NotImplementedError
 

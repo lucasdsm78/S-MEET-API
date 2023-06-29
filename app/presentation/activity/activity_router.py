@@ -11,11 +11,11 @@ from app.application.activities.activity_query_model import ActivityReadModel
 from app.application.activities.activity_query_usecase import ActivityQueryUseCase
 from app.dependency_injections import activity_command_usecase, activity_query_usecase, current_user, file_uploader_dependency
 from app.domain.activity.exception.activity_exception import ActivitiesNotFoundError, ActivityNotFoundError, \
-    MaxParticipantsAtteintsError
+    MaxParticipantsAtteintsError, EventsNotFoundError
 from app.domain.services.file_uploader.file_uploader import FileUploader
 from app.domain.user.exception.user_exception import UserNotFoundError
 from app.presentation.activity.activity_error_message import ErrorMessageActivitiesNotFound, \
-    ErrorMessageActivityNotFound
+    ErrorMessageActivityNotFound, ErrorMessageEventsNotFound
 from app.presentation.user.user_error_message import ErrorMessageUserNotFound
 
 router = APIRouter(
@@ -128,6 +128,34 @@ async def get_activities(
         )
 
     return activities
+
+
+@router.get(
+    "/events",
+    response_model=dict,
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorMessageEventsNotFound,
+        }
+    }
+)
+async def get_events(
+        activity_query_usecase: ActivityQueryUseCase = Depends(activity_query_usecase),
+):
+    try:
+        events = activity_query_usecase.fetch_events()
+
+    except Exception as e:
+        raise
+
+    if not len(events.get("events")):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=EventsNotFoundError.message,
+        )
+
+    return events
 
 
 @router.get(
