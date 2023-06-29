@@ -25,6 +25,13 @@ class ActivitiesNotFoundError(Exception):
         return ActivitiesNotFoundError.message
 
 
+class EventsNotFoundError(Exception):
+    message = "No events found from the API."
+
+    def __str__(self):
+        return EventsNotFoundError.message
+
+
 class ActivityNotFoundError(Exception):
     message = "The activity does not exist."
 
