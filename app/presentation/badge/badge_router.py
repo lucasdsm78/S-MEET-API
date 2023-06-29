@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from app.application.badge.badge_command_model import BadgeCreateModel, BadgeCreateResponse
+from app.application.badge.badge_command_model import BadgeCreateModel, BadgeCreateResponse, BadgeUpdateResponse, \
+    BadgeUpdateModel
 from app.application.badge.badge_command_usecase import BadgeCommandUseCase
 from app.application.badge.badge_query_usecase import BadgeQueryUseCase
 from app.dependency_injections import current_user, badge_command_usecase, badge_query_usecase
-from app.domain.badge.exception.badge_exception import BadgesNotFoundError
+from app.domain.badge.exception.badge_exception import BadgesNotFoundError, BadgeNotFoundError
 from app.presentation.badge.badge_error_message import ErrorMessageBadgesNotFound
 
 router = APIRouter(
@@ -29,6 +30,32 @@ async def create_badge(
         raise
 
     return badge
+
+
+@router.patch(
+    "/badge/{id}/update",
+    response_model=BadgeUpdateResponse,
+    summary="Update badge with a new name",
+    status_code=status.HTTP_202_ACCEPTED,
+)
+async def update_badge(
+        badge_id: int,
+        data: BadgeUpdateModel,
+        badge_command_usecase: BadgeCommandUseCase = Depends(badge_command_usecase),
+):
+    try:
+        update_badge = badge_command_usecase.update_badge(badge_id, data)
+    except BadgeNotFoundError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=e.message,
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=e
+        )
+    return update_badge
 
 
 @router.get(

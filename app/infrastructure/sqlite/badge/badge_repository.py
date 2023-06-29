@@ -25,6 +25,13 @@ class BadgeRepositoryImpl(BadgeRepository):
         except:
             raise
 
+    def update_badge(self, badge: Badge):
+        try:
+            _badge = self.session.query(DBBadge).filter_by(id=badge.id).one()
+            badge_db = DBBadge.from_entity(badge, _badge)
+        except:
+            raise
+
     def find_badges(self) -> List[Badge]:
         try:
             badge_dbs = (
