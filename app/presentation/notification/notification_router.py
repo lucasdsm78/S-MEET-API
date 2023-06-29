@@ -1,9 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from app.application.notification.notification_command_model import NotificationCreateResponse, NotificationCreateModel
+from app.application.notification.notification_command_model import NotificationCreateResponse, NotificationCreateModel, \
+    NotificationUpdateResponse
 from app.application.notification.notification_command_usecase import NotificationCommandUseCase
 from app.application.notification.notification_query_usecase import NotificationQueryUseCase
 from app.dependency_injections import notification_command_usecase, notification_query_usecase, current_user
 from app.domain.notification.exception.notification_exception import NotificationsNotFoundError
+from app.domain.user.exception.user_exception import UserNotFoundError
 from app.presentation.notification.notification_error_message import ErrorMessageNotificationsNotFound
 
 router = APIRouter(
@@ -29,6 +31,30 @@ async def create_notification(
         raise
 
     return notification
+
+@router.patch(
+    "/notifications/update",
+    response_model=NotificationUpdateResponse,
+    summary="Update notifications not read at true",
+    status_code=status.HTTP_202_ACCEPTED,
+)
+async def update_notifications(
+        notification_command_usecase: NotificationCommandUseCase = Depends(notification_command_usecase),
+        current_user: dict = Depends(current_user)
+):
+    try:
+        update_notifications = notification_command_usecase.update_notif(current_user.get('id', ''))
+    except UserNotFoundError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=e.message,
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=e
+        )
+    return update_notifications
 
 
 @router.get(

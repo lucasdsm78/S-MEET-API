@@ -67,6 +67,13 @@ class NotificationRepositoryImpl(NotificationRepository):
         except:
             raise
 
+    def update_notification(self, notification: Notification):
+        try:
+            _notif = self.session.query(DBNotification).filter_by(id=notification.id).one()
+            notif_db = DBNotification.from_entity(notification, _notif)
+        except:
+            raise
+
     def begin(self):
         self.session.begin()
 

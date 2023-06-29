@@ -28,6 +28,10 @@ class NotificationRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def update_notification(self, notification: Notification) -> Optional[Notification]:
+        raise NotImplementedError
+
+    @abstractmethod
     def commit(self):
         raise NotImplementedError
 
