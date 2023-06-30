@@ -54,7 +54,7 @@ class FriendQueryUseCaseImpl(FriendQueryUseCase, BaseModel):
             if current_user is None:
                 raise UserNotFoundError
 
-            status = self.friend_repository.get_status_friend(current_user.id, user_second.id)
+            status = self.friend_repository.check_friend(current_user.id, user_second.id)
 
             return status
 
