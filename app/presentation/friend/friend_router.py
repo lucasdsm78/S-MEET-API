@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query, UploadFile, File
 
 from app.application.friend.friend_command_model import FriendAddModel, FriendRemoveResponse, FriendRemoveModel, \
-    FriendAddResponse
+    FriendAddResponse, FriendUpdateResponse
 from app.application.friend.friend_command_usecase import FriendCommandUseCase
 from app.application.friend.friend_query_model import FriendReadModel
 from app.application.friend.friend_query_usecase import FriendQueryUseCase
@@ -118,13 +118,39 @@ async def get_friends(
 
 
 @router.get(
-    "/friend/status/{friend_id}",
+    "/friend/status/{user_id}",
     response_model=bool,
     status_code=status.HTTP_200_OK
 )
 async def get_status(
-        friend_id: int,
+        user_id: int,
         friend_query_usecase: FriendQueryUseCase = Depends(friend_query_usecase),
         current_user: dict = Depends(current_user),
 ):
-    return friend_query_usecase.get_status(current_user.get('id', ''), friend_id)
+    return friend_query_usecase.get_status(current_user.get('id', ''), user_id)
+
+
+@router.patch(
+    "/friend/accept/{user_id}",
+    response_model=FriendUpdateResponse,
+    summary="Accept a friend request",
+    status_code=status.HTTP_202_ACCEPTED,
+)
+async def accept_request_friend(
+        user_id: int,
+        friend_command_usecase: FriendCommandUseCase = Depends(friend_command_usecase),
+        current_user: dict = Depends(current_user)
+):
+    try:
+        update_friend = friend_command_usecase.update_friend(current_user.get('id', ''), user_id)
+    except UserNotFoundError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=e.message,
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=e
+        )
+    return update_friend
