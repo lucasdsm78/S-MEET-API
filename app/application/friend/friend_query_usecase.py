@@ -30,10 +30,15 @@ class FriendQueryUseCaseImpl(FriendQueryUseCase, BaseModel):
 
     def get_friends(self, user_id: int) -> dict:
         try:
+            users = []
             friends = self.friend_repository.find_friends(user_id)
+            for friend in friends:
+                user = self.user_repository.find_by_id(friend.id_second_user)
+                users.append(user)
+
             return dict(
-                friends=list(map(lambda friend: FriendReadModel.from_entity(
-                    friend=friend), friends))
+                friends=list(map(lambda user: FriendReadModel.from_entity(
+                    user=user), users))
             )
 
         except Exception as e:
