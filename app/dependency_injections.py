@@ -10,6 +10,8 @@ from app.application.notification.notification_command_usecase import Notificati
     NotificationCommandUseCaseImpl
 from app.application.notification.notification_query_usecase import NotificationQueryUseCase, \
     NotificationQueryUseCaseImpl
+from app.application.friend.friend_command_usecase import FriendCommandUseCase, FriendCommandUseCaseImpl
+from app.application.friend.friend_query_usecase import FriendQueryUseCaseImpl, FriendQueryUseCase
 from app.application.quiz.quiz_command_usecase import QuizCommandUseCase, QuizCommandUseCaseImpl
 from app.application.quiz.quiz_query_usecase import QuizQueryUseCase, QuizQueryUseCaseImpl
 from app.application.school.school_command_usecase import SchoolCommandUseCase, SchoolCommandUseCaseImpl
@@ -26,6 +28,7 @@ from app.domain.chat.message.repository.message_repository import MessageReposit
 from app.domain.chat.room.repository.room_participant_repository import RoomParticipantRepository
 from app.domain.chat.room.repository.room_repository import RoomRepository
 from app.domain.notification.repository.notification_repository import NotificationRepository
+from app.domain.friend.repository.friend_repository import FriendRepository
 from app.domain.quiz.repository.quiz_repository import QuizRepository
 from app.domain.school.repository.school_repository import SchoolRepository
 from app.domain.services.file_uploader.file_uploader import FileUploader
@@ -57,6 +60,7 @@ from app.infrastructure.sqlite.chat.message.message_repository import MessageRep
 from app.infrastructure.sqlite.chat.room.room_participant_repository import RoomParticipantRepositoryImpl
 from app.infrastructure.sqlite.chat.room.room_repository import RoomRepositoryImpl
 from app.infrastructure.sqlite.database import create_tables, SessionLocal
+from app.infrastructure.sqlite.friend.friend_repository import FriendRepositoryImpl
 from app.infrastructure.sqlite.notification.notification_repository import NotificationRepositoryImpl
 from app.infrastructure.sqlite.quiz.quiz_repository import QuizRepositoryImpl
 from app.infrastructure.sqlite.school.school_repository import SchoolRepositoryImpl
@@ -130,6 +134,10 @@ def school_repository_dependency(session: Session = Depends(get_session)) -> Sch
 
 def activity_repository_dependency(session: Session = Depends(get_session)) -> ActivityRepository:
     return ActivityRepositoryImpl(session)
+
+
+def friend_repository_dependency(session: Session = Depends(get_session)) -> FriendRepository:
+    return FriendRepositoryImpl(session)
 
 
 def quiz_repository_dependency(session: Session = Depends(get_session)) -> QuizRepository:
@@ -356,6 +364,26 @@ def room_command_usecase(
         school_repository=school_repository,
         user_repository=user_repository,
         room_participant_repository=room_participant_repository
+    )
+
+
+def friend_command_usecase(
+        friend_repository: FriendRepository = Depends(friend_repository_dependency),
+        user_repository: UserRepository = Depends(user_repository_dependency),
+) -> FriendCommandUseCase:
+    return FriendCommandUseCaseImpl(
+        friend_repository=friend_repository,
+        user_repository=user_repository
+    )
+
+
+def friend_query_usecase(
+        friend_repository: FriendRepository = Depends(friend_repository_dependency),
+        user_repository: UserRepository = Depends(user_repository_dependency),
+) -> FriendQueryUseCase:
+    return FriendQueryUseCaseImpl(
+        friend_repository=friend_repository,
+        user_repository=user_repository
     )
 
 
