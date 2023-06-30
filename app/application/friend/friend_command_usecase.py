@@ -17,10 +17,6 @@ class FriendCommandUseCase(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def update_friend(self, current_user_id: int, user_id: int) -> FriendUpdateResponse:
-        raise NotImplementedError
-
-    @abstractmethod
     def remove(self, current_user_id: int, friend_id: int) -> FriendRemoveResponse:
         raise NotImplementedError
 
@@ -67,9 +63,6 @@ class FriendCommandUseCaseImpl(FriendCommandUseCase):
             if existing_friend is None:
                 raise FriendNotFoundError
 
-            if existing_friend.is_friend is False:
-                raise NotFriendError
-
             self.friend_repository.delete_friend(existing_friend.id)
             self.friend_repository.commit()
 
@@ -78,20 +71,3 @@ class FriendCommandUseCaseImpl(FriendCommandUseCase):
             raise
 
         return FriendRemoveResponse()
-
-    def update_friend(self, current_user_id: int, user_id: int) -> FriendUpdateResponse:
-        try:
-            current_user = self.user_repository.find_by_id(current_user_id)
-            user = self.user_repository.find_by_id(user_id)
-
-            friend = self.friend_repository.find_friend(current_user.id, user.id)
-
-            friend.is_friend = True
-            self.friend_repository.update_friend(friend)
-            self.friend_repository.commit()
-
-        except:
-            self.friend_repository.rollback()
-            raise
-
-        return FriendUpdateResponse()

@@ -47,7 +47,6 @@ class FriendRepositoryImpl(FriendRepository):
         try:
             friend_dbs = (
                 self.session.query(DBFriend)
-                .filter_by(is_friend=True)
                 .filter((DBFriend.id_owner_profile == user_id) | (DBFriend.id_second_user == user_id))
                 .all()
             )
