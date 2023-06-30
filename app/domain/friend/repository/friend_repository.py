@@ -32,6 +32,10 @@ class FriendRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def update_friend(self, friend: Friend) -> Optional[Friend]:
+        raise NotImplementedError
+
+    @abstractmethod
     def delete_friend(self, friend_id: int):
         raise NotImplementedError
 

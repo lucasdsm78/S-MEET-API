@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 
-from app.application.friend.friend_command_model import FriendAddModel, FriendAddResponse, FriendRemoveResponse
+from app.application.friend.friend_command_model import FriendAddModel, FriendAddResponse, FriendRemoveResponse, \
+    FriendUpdateResponse
 from app.domain.friend.exception.friend_exception import FriendNotFoundError, FriendAlreadyExistsError, NotFriendError
 
 from app.domain.friend.model.friend import Friend
@@ -13,6 +14,10 @@ class FriendCommandUseCase(ABC):
 
     @abstractmethod
     def add(self, owner_profile_id: int, second_user_id: int) -> FriendAddResponse:
+        raise NotImplementedError
+
+    @abstractmethod
+    def update_friend(self, current_user_id: int, user_id: int) -> FriendUpdateResponse:
         raise NotImplementedError
 
     @abstractmethod
@@ -73,3 +78,20 @@ class FriendCommandUseCaseImpl(FriendCommandUseCase):
             raise
 
         return FriendRemoveResponse()
+
+    def update_friend(self, current_user_id: int, user_id: int) -> FriendUpdateResponse:
+        try:
+            current_user = self.user_repository.find_by_id(current_user_id)
+            user = self.user_repository.find_by_id(user_id)
+
+            friend = self.friend_repository.find_friend(current_user.id, user.id)
+
+            friend.is_friend = True
+            self.friend_repository.update_friend(friend)
+            self.friend_repository.commit()
+
+        except:
+            self.friend_repository.rollback()
+            raise
+
+        return FriendUpdateResponse()

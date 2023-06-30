@@ -12,6 +12,10 @@ class FriendAddResponse(BaseModel):
     message: str = "The friend is well added"
 
 
+class FriendUpdateResponse(BaseModel):
+    message: str = "The friend is well updated"
+
+
 class FriendRemoveModel(BaseModel):
     """FriendRemoveModel represents a write model to remove a friend."""
 

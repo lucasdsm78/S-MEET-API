@@ -84,6 +84,13 @@ class FriendRepositoryImpl(FriendRepository):
 
         return result
 
+    def update_friend(self, friend: Friend):
+        try:
+            _friend = self.session.query(DBFriend).filter_by(id=friend.id).one()
+            friend_db = DBFriend.from_entity(friend, _friend)
+        except:
+            raise
+
 
     def begin(self):
         self.session.begin()
