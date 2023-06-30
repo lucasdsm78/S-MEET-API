@@ -5,6 +5,13 @@ class FriendAlreadyExistsError(Exception):
         return FriendAlreadyExistsError.message
 
 
+class NotFriendError(Exception):
+    message = "You are not friend with this user."
+
+    def __str__(self):
+        return NotFriendError.message
+
+
 class FriendsNotFoundError(Exception):
     message = "No friends found from the API."
 

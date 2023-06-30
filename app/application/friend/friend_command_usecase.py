@@ -1,9 +1,7 @@
 from abc import ABC, abstractmethod
 
 from app.application.friend.friend_command_model import FriendAddModel, FriendAddResponse, FriendRemoveResponse
-from app.domain.services.hash import Hash
-from app.domain.services.manager_token import ManagerToken
-from app.domain.friend.exception.friend_exception import FriendNotFoundError, FriendAlreadyExistsError
+from app.domain.friend.exception.friend_exception import FriendNotFoundError, FriendAlreadyExistsError, NotFriendError
 
 from app.domain.friend.model.friend import Friend
 from app.domain.friend.repository.friend_repository import FriendRepository
@@ -14,11 +12,11 @@ class FriendCommandUseCase(ABC):
     """FriendCommandUseCase defines a command usecase inteface related Friend entity."""
 
     @abstractmethod
-    def add(self, friend_id: int) -> FriendAddResponse:
+    def add(self, owner_profile_id: int, second_user_id: int) -> FriendAddResponse:
         raise NotImplementedError
 
     @abstractmethod
-    def remove(self, friend_id: int) -> FriendRemoveResponse:
+    def remove(self, current_user_id: int, friend_id: int) -> FriendRemoveResponse:
         raise NotImplementedError
 
 
@@ -33,23 +31,24 @@ class FriendCommandUseCaseImpl(FriendCommandUseCase):
         self.friend_repository: FriendRepository = friend_repository
         self.user_repository: UserRepository = user_repository
 
-    def create(self, data: int) -> FriendAddResponse:
+    def add(self, owner_profile_id: int, second_user_id: int) -> FriendAddResponse:
         try:
-            friend = Friend(
-                id_owner_profile=self.user_repository.id,
-                id_second_user=data
-            )
+            owner_profile = self.user_repository.find_by_id(owner_profile_id)
+            second_user = self.user_repository.find_by_id(second_user_id)
 
-            existing_friend = self.friend_repository.find_friend(friend.id)
-            if existing_friend is not None:
+            check_friend = self.friend_repository.check_friend(owner_profile.id, second_user.id)
+
+            if check_friend is not False:
                 raise FriendAlreadyExistsError
+
+            friend = Friend(
+                id_owner_profile=owner_profile.id,
+                id_second_user=second_user.id,
+                is_friend=False
+            )
 
             self.friend_repository.add(friend)
             self.friend_repository.commit()
-
-            friend = self.friend_repository.find_friend(friend.id)
-            if not friend:
-                raise FriendNotFoundError(friend)
 
         except:
             self.friend_repository.rollback()
@@ -57,18 +56,17 @@ class FriendCommandUseCaseImpl(FriendCommandUseCase):
 
         return FriendAddResponse()
 
-    def remove(self, data: Friend) -> FriendRemoveResponse:
+    def remove(self, current_user_id: int, friend_id: int) -> FriendRemoveResponse:
         try:
-            not_found_friend = self.friend_repository.find_friend(data.id)
-            if not_found_friend is not None:
+            existing_friend = self.friend_repository.find_friend(current_user_id, friend_id)
+            if existing_friend is None:
                 raise FriendNotFoundError
 
-            self.friend_repository.remove(data)
-            self.friend_repository.commit()
+            if existing_friend.is_friend is False:
+                raise NotFriendError
 
-            friend = self.friend_repository.find_friend(data.id)
-            if not friend:
-                raise FriendNotFoundError(friend)
+            self.friend_repository.delete_friend(existing_friend.id)
+            self.friend_repository.commit()
 
         except:
             self.friend_repository.rollback()

@@ -379,9 +379,11 @@ def friend_command_usecase(
 
 def friend_query_usecase(
         friend_repository: FriendRepository = Depends(friend_repository_dependency),
+        user_repository: UserRepository = Depends(user_repository_dependency),
 ) -> FriendQueryUseCase:
     return FriendQueryUseCaseImpl(
-        friend_repository=friend_repository
+        friend_repository=friend_repository,
+        user_repository=user_repository
     )
 
 

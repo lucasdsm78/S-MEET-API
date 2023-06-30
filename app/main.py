@@ -12,6 +12,7 @@ from app.presentation.quiz.quiz_router import router as quiz_router
 from app.presentation.smeet.smeet_router import router as smeet_router
 from app.presentation.badge.badge_router import router as badge_router
 from app.presentation.notification.notification_router import router as notification_router
+from app.presentation.friend.friend_router import router as friend_router
 
 settings = get_settings()
 app = FastAPI()
@@ -27,6 +28,7 @@ app.include_router(quiz_router)
 app.include_router(smeet_router)
 app.include_router(badge_router)
 app.include_router(notification_router)
+app.include_router(friend_router)
 
 # create the database and import models
 

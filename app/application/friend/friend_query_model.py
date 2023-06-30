@@ -9,6 +9,7 @@ class FriendReadModel(BaseModel):
     id: int
     id_owner_profile: int = Field(example=0)
     id_second_user: int = Field(example=1)
+    is_friend: bool
 
     class Config:
         arbitrary_types_allowed = True
@@ -18,5 +19,6 @@ class FriendReadModel(BaseModel):
         return FriendReadModel(
             id=friend.id,
             id_owner_profile=friend.id_owner_profile,
-            id_second_user=friend.id_second_user
+            id_second_user=friend.id_second_user,
+            is_friend=friend.is_friend
         )
